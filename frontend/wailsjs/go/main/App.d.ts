@@ -30,6 +30,8 @@ export function GetGatewayStatus():Promise<main.GatewayStatus>;
 
 export function GetMessages():Promise<Array<main.ChatMessage>>;
 
+export function GetNanobotInfo():Promise<Record<string, any>>;
+
 export function GetProviders():Promise<Record<string, any>>;
 
 export function GetSessions():Promise<Array<main.SessionInfo>>;
@@ -59,6 +61,8 @@ export function SaveConfig(arg1:string):Promise<void>;
 export function SendMessage(arg1:string):Promise<void>;
 
 export function SetChannelField(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function SetNanobotPath(arg1:string):Promise<void>;
 
 export function SetProviderAPIKey(arg1:string,arg2:string):Promise<void>;
 

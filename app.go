@@ -1015,6 +1015,18 @@ func (a *App) OpenURL(rawurl string) {
 // ==================== Helpers ====================
 
 func findNanobot() (string, error) {
+	// 0. Check custom path from settings
+	settingsPath := filepath.Join(configDir(), "settings.json")
+	if data, err := os.ReadFile(settingsPath); err == nil {
+		var settings map[string]interface{}
+		json.Unmarshal(data, &settings)
+		if cp, ok := settings["nanobotPath"].(string); ok && cp != "" {
+			if _, err := os.Stat(cp); err == nil {
+				return cp, nil
+			}
+		}
+	}
+
 	// 1. Check bundled binary (next to the executable)
 	if exe, err := os.Executable(); err == nil {
 		bundled := filepath.Join(filepath.Dir(exe), "nanobot-bin", "nanobot")
@@ -1046,7 +1058,7 @@ func findNanobot() (string, error) {
 			return c, nil
 		}
 	}
-	return "", fmt.Errorf("nanobot not found in PATH or ~/.local/bin")
+	return "", fmt.Errorf("nanobot not found")
 }
 
 func strVal(v interface{}) string {
@@ -1150,7 +1162,90 @@ func (a *App) CheckNanobotInstalled() string {
 	return path
 }
 
+// SetNanobotPath allows user to specify a custom nanobot binary path.
+// Saves to app settings file (not config.json).
+func (a *App) SetNanobotPath(customPath string) error {
+	settingsPath := filepath.Join(configDir(), "settings.json")
+	settings := map[string]interface{}{}
+	if data, err := os.ReadFile(settingsPath); err == nil {
+		json.Unmarshal(data, &settings)
+	}
+	settings["nanobotPath"] = customPath
+	data, _ := json.MarshalIndent(settings, "", "  ")
+	return os.WriteFile(settingsPath, data, 0644)
+}
+
+// GetNanobotInfo returns detailed info about the nanobot binary being used
+func (a *App) GetNanobotInfo() map[string]interface{} {
+	result := map[string]interface{}{
+		"path":       "",
+		"source":     "none",
+		"version":    "",
+		"available":  false,
+		"customPath": "",
+	}
+
+	// Check custom path first
+	settingsPath := filepath.Join(configDir(), "settings.json")
+	if data, err := os.ReadFile(settingsPath); err == nil {
+		var settings map[string]interface{}
+		json.Unmarshal(data, &settings)
+		if cp, ok := settings["nanobotPath"].(string); ok && cp != "" {
+			result["customPath"] = cp
+			if _, err := os.Stat(cp); err == nil {
+				result["path"] = cp
+				result["source"] = "custom"
+				result["available"] = true
+			}
+		}
+	}
+
+	// If no custom path or custom path invalid, find normally
+	if !result["available"].(bool) {
+		if path, err := findNanobot(); err == nil {
+			result["path"] = path
+			result["available"] = true
+			// Determine source
+			if exe, err := os.Executable(); err == nil {
+				bundled := filepath.Join(filepath.Dir(exe), "nanobot-bin")
+				if goRuntime.GOOS == "windows" {
+					bundled += "\\nanobot.exe"
+				} else {
+					bundled += "/nanobot"
+				}
+				if path == bundled {
+					result["source"] = "bundled"
+				} else {
+					resources := filepath.Join(filepath.Dir(exe), "..", "Resources", "nanobot-bin")
+					if goRuntime.GOOS == "windows" {
+						resources += "\\nanobot.exe"
+					} else {
+						resources += "/nanobot"
+					}
+					if path == resources {
+						result["source"] = "bundled"
+					}
+				}
+			}
+			if result["source"] == "none" {
+				result["source"] = "external"
+			}
+		}
+	}
+
+	// Try to get version
+	if result["available"].(bool) {
+		path := result["path"].(string)
+		if out, err := exec.Command(path, "--version").CombinedOutput(); err == nil {
+			result["version"] = strings.TrimSpace(string(out))
+		}
+	}
+
+	return result
+}
+
 // GetSetupState returns whether setup is needed
+// Note: nanobot binary is NOT required for setup — bundled binary is preferred.
 func (a *App) GetSetupState() map[string]interface{} {
 	result := map[string]interface{}{
 		"needsSetup":  false,
@@ -1159,17 +1254,16 @@ func (a *App) GetSetupState() map[string]interface{} {
 		"hasChannel":  false,
 	}
 
-	// Check nanobot
+	// Check nanobot (informational only — not a setup blocker)
 	if path, err := findNanobot(); err == nil {
 		result["nanobotPath"] = path
-	} else {
-		result["needsSetup"] = true
 	}
 
 	// Check config
 	configPath := a.activeConfigPath()
 	data, err := os.ReadFile(configPath)
 	if err != nil {
+		// No config file at all → needs setup
 		result["needsSetup"] = true
 		return result
 	}
@@ -1179,7 +1273,7 @@ func (a *App) GetSetupState() map[string]interface{} {
 		return result
 	}
 
-	// Check providers
+	// Check providers — need at least one API key
 	if providers, ok := raw["providers"].(map[string]interface{}); ok {
 		for _, p := range providers {
 			if cfg, ok := p.(map[string]interface{}); ok {
@@ -1198,7 +1292,7 @@ func (a *App) GetSetupState() map[string]interface{} {
 		result["needsSetup"] = true
 	}
 
-	// Check channels
+	// Channel is optional — don't block setup on it
 	if channels, ok := raw["channels"].(map[string]interface{}); ok {
 		for _, ch := range channels {
 			if cfg, ok := ch.(map[string]interface{}); ok {
@@ -1208,9 +1302,6 @@ func (a *App) GetSetupState() map[string]interface{} {
 				}
 			}
 		}
-	}
-	if !result["hasChannel"].(bool) {
-		result["needsSetup"] = true
 	}
 
 	return result

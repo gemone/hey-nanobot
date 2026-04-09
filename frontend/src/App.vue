@@ -84,7 +84,7 @@
         <ProvidersPage v-else-if="currentPage === 'providers'" :providers="providers" @set-key="setProviderKey" />
         <ConfigPage v-else-if="currentPage === 'config'" :config-json="configJson" @save="saveConfig" />
         <GatewayPage v-else-if="currentPage === 'gateway'" :status="gatewayStatus" :logs="gatewayLogs" @start="startGateway" @stop="stopGateway" @restart="restartGateway" @clear-logs="clearLogs" />
-        <SystemPage v-else-if="currentPage === 'system'" :info="systemInfo" />
+        <SystemPage v-else-if="currentPage === 'system'" :info="systemInfo" :nanobot-info="nanobotInfo" />
       </v-main>
     </template>
   </v-app>
@@ -99,7 +99,7 @@ import {
   GetSessions, GetSystemInfo,
   OpenInFinder,
   GetGatewayLogs, ClearGatewayLogs,
-  GetActiveBot, ListBots, GetSetupState,
+  GetActiveBot, ListBots, GetSetupState, GetNanobotInfo,
 } from '../wailsjs/go/main/App'
 import { EventsOn } from '../wailsjs/runtime/runtime'
 
@@ -183,6 +183,14 @@ const sessions = ref<any[]>([])
 
 // ====== System ======
 const systemInfo = ref<Record<string, string>>({})
+const nanobotInfo = ref({ path: '', source: 'none', version: '', available: false })
+
+async function loadNanobotInfo() {
+  try {
+    const info = await GetNanobotInfo() as any
+    nanobotInfo.value = info
+  } catch {}
+}
 
 function openInFinder(path: string) { OpenInFinder(path) }
 
@@ -207,7 +215,7 @@ onMounted(async () => {
     }
   } catch {}
 
-  await Promise.all([loadActiveBot(), loadConfig(), loadChannels(), loadProviders(), loadGatewayStatus()])
+  await Promise.all([loadActiveBot(), loadConfig(), loadChannels(), loadProviders(), loadGatewayStatus(), loadNanobotInfo()])
   try { systemInfo.value = await GetSystemInfo() } catch {}
 
   // Event listeners

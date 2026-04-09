@@ -58,6 +58,10 @@ export function GetMessages() {
   return window['go']['main']['App']['GetMessages']();
 }
 
+export function GetNanobotInfo() {
+  return window['go']['main']['App']['GetNanobotInfo']();
+}
+
 export function GetProviders() {
   return window['go']['main']['App']['GetProviders']();
 }
@@ -116,6 +120,10 @@ export function SendMessage(arg1) {
 
 export function SetChannelField(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetChannelField'](arg1, arg2, arg3);
+}
+
+export function SetNanobotPath(arg1) {
+  return window['go']['main']['App']['SetNanobotPath'](arg1);
 }
 
 export function SetProviderAPIKey(arg1, arg2) {

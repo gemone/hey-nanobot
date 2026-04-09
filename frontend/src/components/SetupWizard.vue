@@ -3,14 +3,32 @@
     <v-card width="640" rounded="xl" class="setup-card">
       <!-- Stepper -->
       <v-stepper v-model="step" :items="steps" hide-actions bg-color="transparent" flat>
+        <!-- Step 1: Welcome -->
         <template v-slot:item.1>
-          <!-- Welcome -->
           <v-card-text class="text-center py-8">
             <div style="font-size: 64px;" class="mb-4">🐈</div>
             <h2 class="text-h5 font-weight-bold mb-2">Welcome to Hey Nanobot</h2>
             <p class="text-body-2 text-medium-emphasis mb-6" style="max-width: 420px; margin: 0 auto;">
-              你的个人 AI 助手桌面客户端。几步即可完成配置，开始使用。
+              你的个人 AI 助手桌面客户端。内置 nanobot 引擎，只需配置 AI 服务即可开始。
             </p>
+            <!-- Nanobot status (informational) -->
+            <v-alert
+              :type="nanobotInfo.available ? 'success' : 'warning'"
+              variant="tonal"
+              class="mb-4 text-left"
+              density="compact"
+            >
+              <template v-slot:prepend>
+                <v-icon :icon="nanobotInfo.available ? 'mdi-check-circle' : 'mdi-information'" />
+              </template>
+              <span v-if="nanobotInfo.available">
+                ✅ nanobot 引擎就绪
+                <span class="text-caption text-medium-emphasis ml-2">({{ nanobotInfo.source }})</span>
+              </span>
+              <span v-else>
+                ⚠️ 未检测到 nanobot 引擎，可先完成配置，后续在设置中指定路径
+              </span>
+            </v-alert>
             <v-btn color="primary" size="large" rounded="lg" @click="step = 2">
               开始配置
               <v-icon end>mdi-arrow-right</v-icon>
@@ -18,50 +36,11 @@
           </v-card-text>
         </template>
 
+        <!-- Step 2: Provider -->
         <template v-slot:item.2>
-          <!-- Check nanobot -->
-          <v-card-text class="py-6">
-            <h3 class="text-h6 mb-4">检测 nanobot</h3>
-            <v-alert
-              :type="nanobotPath ? 'success' : 'error'"
-              variant="tonal"
-              class="mb-4"
-            >
-              <template v-slot:prepend>
-                <v-icon :icon="nanobotPath ? 'mdi-check-circle' : 'mdi-alert-circle'" />
-              </template>
-              <span v-if="nanobotPath">
-                ✅ 已找到 nanobot：<code>{{ nanobotPath }}</code>
-              </span>
-              <span v-else>
-                ❌ 未找到 nanobot，请先安装。
-              </span>
-            </v-alert>
-
-            <div v-if="!nanobotPath" class="mb-4">
-              <p class="text-body-2 text-medium-emphasis mb-3">运行以下命令安装：</p>
-              <v-code tag="code" class="d-block pa-3 rounded-lg mb-3" style="background: #0f0f1a;">
-                uv tool install nanobot-ai
-              </v-code>
-              <p class="text-caption text-medium-emphasis">
-                需要 Python 3.11+ 和 <a href="https://github.com/astral-sh/uv" target="_blank" style="color: #6c5ce7;">uv</a> 包管理器
-              </p>
-            </div>
-
-            <div class="d-flex justify-space-between">
-              <v-btn variant="text" @click="step = 1">上一步</v-btn>
-              <v-btn color="primary" @click="checkNanobot" :loading="checking">
-                <v-icon start>mdi-refresh</v-icon> 重新检测
-              </v-btn>
-            </div>
-          </v-card-text>
-        </template>
-
-        <template v-slot:item.3>
-          <!-- Provider -->
           <v-card-text class="py-6">
             <h3 class="text-h6 mb-2">配置 AI Provider</h3>
-            <p class="text-body-2 text-medium-emphasis mb-4">选择一个 AI 服务商并填入 API Key。</p>
+            <p class="text-body-2 text-medium-emphasis mb-4">选择一个 AI 服务商并填入 API Key（必填）。</p>
 
             <v-select
               v-model="selectedProvider"
@@ -87,10 +66,10 @@
             />
 
             <div class="d-flex justify-space-between">
-              <v-btn variant="text" @click="step = 2">上一步</v-btn>
+              <v-btn variant="text" @click="step = 1">上一步</v-btn>
               <v-btn
                 color="primary"
-                @click="step = 4"
+                @click="step = 3"
                 :disabled="!providerApiKey.trim()"
               >
                 下一步
@@ -100,8 +79,8 @@
           </v-card-text>
         </template>
 
-        <template v-slot:item.4>
-          <!-- Channel -->
+        <!-- Step 3: Channel (optional) -->
+        <template v-slot:item.3>
           <v-card-text class="py-6">
             <h3 class="text-h6 mb-2">配置消息渠道</h3>
             <p class="text-body-2 text-medium-emphasis mb-4">选择一个消息平台，填入 Bot Token。（可选，可跳过）</p>
@@ -133,7 +112,7 @@
             </template>
 
             <div class="d-flex justify-space-between">
-              <v-btn variant="text" @click="step = 3">上一步</v-btn>
+              <v-btn variant="text" @click="step = 2">上一步</v-btn>
               <v-btn color="primary" @click="saveAndFinish" :loading="saving">
                 完成配置
                 <v-icon end>mdi-check</v-icon>
@@ -149,8 +128,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import {
-  CheckNanobotInstalled,
-  SetupSaveConfig,
+  GetNanobotInfo,
   SetProviderAPIKey,
   SetChannelField,
 } from '../../wailsjs/go/main/App'
@@ -158,21 +136,21 @@ import {
 const emit = defineEmits<{ (e: 'done'): void }>()
 
 const step = ref(1)
-const steps = ['欢迎', '安装 nanobot', 'AI Provider', '消息渠道']
+const steps = ['欢迎', 'AI Provider', '消息渠道']
 
-// Step 2
-const nanobotPath = ref('')
-const checking = ref(false)
+// Nanobot info (informational)
+const nanobotInfo = ref<{ available: boolean; source: string; path: string }>({
+  available: false, source: 'none', path: ''
+})
 
-async function checkNanobot() {
-  checking.value = true
+async function loadNanobotInfo() {
   try {
-    nanobotPath.value = await CheckNanobotInstalled()
+    const info = await GetNanobotInfo() as any
+    nanobotInfo.value = info
   } catch {}
-  checking.value = false
 }
 
-// Step 3
+// Step 2: Provider
 const showKey = ref(false)
 const selectedProvider = ref('openai')
 const providerApiKey = ref('')
@@ -186,7 +164,7 @@ const providerList = [
   { key: 'ollama', label: 'Ollama (本地)', keyLabel: 'Ollama Base URL' },
 ]
 
-// Step 4
+// Step 3: Channel
 const selectedChannel = ref<string | null>(null)
 const channelData = ref<Record<string, string>>({})
 
@@ -235,12 +213,12 @@ const saving = ref(false)
 async function saveAndFinish() {
   saving.value = true
   try {
-    // Save provider
+    // Save provider (required)
     if (selectedProvider.value && providerApiKey.value.trim()) {
       await SetProviderAPIKey(selectedProvider.value, providerApiKey.value.trim())
     }
 
-    // Save channel
+    // Save channel (optional)
     if (selectedChannel.value) {
       const chFields = channelFields.value
       for (const f of chFields) {
@@ -260,7 +238,7 @@ async function saveAndFinish() {
   saving.value = false
 }
 
-onMounted(checkNanobot)
+onMounted(loadNanobotInfo)
 </script>
 
 <style scoped>
