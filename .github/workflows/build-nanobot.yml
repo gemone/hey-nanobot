@@ -6,9 +6,6 @@ on:
       - main
     tags:
       - 'v*'
-    paths:
-      - 'build_nano.py'
-      - '.github/workflows/build-nanobot.yml'
   workflow_dispatch:
     inputs:
       version:
