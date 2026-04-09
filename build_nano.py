@@ -39,9 +39,22 @@ else:
     UV_TOOL_ROOT = Path.home() / ".local/share/uv/tools/nanobot-ai"
 
 # Override site-packages with env var (for venv-based CI installs)
+# If the env var points to a directory that does NOT contain nanobot/,
+# try appending Lib/site-packages (Windows venv) or lib/pythonX.Y/site-packages.
 _env_site = os.environ.get("NANOBOT_SITE_PACKAGES")
 if _env_site:
     SITE_PACKAGES = Path(_env_site)
+    if not (SITE_PACKAGES / "nanobot").is_dir():
+        # Windows venv: site.getsitepackages()[0] may return the venv root
+        _win_candidate = SITE_PACKAGES / "Lib" / "site-packages"
+        if (_win_candidate / "nanobot").is_dir():
+            SITE_PACKAGES = _win_candidate
+        else:
+            # Unix venv fallback: lib/pythonX.Y/site-packages
+            import sys
+            _unix_candidate = SITE_PACKAGES / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+            if (_unix_candidate / "nanobot").is_dir():
+                SITE_PACKAGES = _unix_candidate
 else:
     SITE_PACKAGES = UV_TOOL_ROOT / "lib/python3.13/site-packages"
 
