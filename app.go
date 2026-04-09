@@ -526,11 +526,12 @@ func (a *App) SetChannelField(channel string, field string, value string) error 
 	json.Unmarshal(data, &raw)
 	channels, ok := raw["channels"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("channels not found")
+		channels = make(map[string]interface{})
+		raw["channels"] = channels
 	}
 	ch, ok := channels[channel].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("channel %s not found", channel)
+		ch = make(map[string]interface{})
 	}
 	var parsed interface{}
 	if err := json.Unmarshal([]byte(value), &parsed); err != nil {
