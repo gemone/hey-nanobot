@@ -9,6 +9,8 @@ build/bin/
 build_nanobot/
 nanobot-bin/
 dist/
+build_nano.spec
+_nanobot_entry.py
 
 # IDE
 .vscode/
