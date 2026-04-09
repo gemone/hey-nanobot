@@ -117,9 +117,8 @@ func (a *App) activeConfigPath() string {
 	if bot != nil {
 		return bot.ConfigPath
 	}
-	// Fallback
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".nanobot", "config.json")
+	// Fallback to standard config dir
+	return filepath.Join(configDir(), "bots", "default", "config.json")
 }
 
 // activeWorkspace returns the active bot's workspace path
@@ -128,8 +127,7 @@ func (a *App) activeWorkspace() string {
 	if bot != nil {
 		return bot.Workspace
 	}
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".nanobot", "workspace")
+	return filepath.Join(configDir(), "bots", "default", "workspace")
 }
 
 // ==================== Lifecycle ====================
@@ -965,6 +963,7 @@ func (a *App) GetSystemInfo() map[string]string {
 		"nanobot":         nanobotBin,
 		"configPath":      a.activeConfigPath(),
 		"workspace":       a.activeWorkspace(),
+		"configDir":       configDir(),
 		"goVersion":       goRuntime.Version(),
 		"version":         version,
 		"channelMessages": fmt.Sprintf("%d", len(a.channelMsgs)),

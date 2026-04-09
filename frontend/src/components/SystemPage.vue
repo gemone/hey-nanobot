@@ -29,7 +29,7 @@
         <div style="font-size:13px; color:var(--text-secondary); line-height:1.6">
           Hey Nanobot — Personal AI Assistant<br/>
           Built with Go + Wails + Vue 3<br/>
-          <span style="color:var(--text-muted); font-size:11px">v1.1.0 · {{ info.goVersion }}</span>
+          <span style="color:var(--text-muted); font-size:11px">v1.2.0 · {{ info.goVersion }}</span>
         </div>
       </div>
     </div>

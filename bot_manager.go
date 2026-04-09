@@ -53,15 +53,26 @@ var defaultAvatars = []string{"🐱", "🤖", "🦊", "🐶", "🐸", "🦁", "�
 type BotManager struct {
 	mu           sync.RWMutex
 	registryPath string
-	appDir       string
+	appDir       string // Standard config dir (e.g. ~/Library/Application Support/hey-nanobot)
 	registry     *BotRegistry
+}
+
+// configDir returns the OS-standard config directory.
+// macOS: ~/Library/Application Support/hey-nanobot
+// Linux: ~/.config/hey-nanobot
+// Windows: %AppData%/hey-nanobot
+func configDir() string {
+	if dir, err := os.UserConfigDir(); err == nil {
+		return filepath.Join(dir, appDirName)
+	}
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, "."+appDirName)
 }
 
 // ==================== Constructor ====================
 
 func NewBotManager() *BotManager {
-	home, _ := os.UserHomeDir()
-	appDir := filepath.Join(home, "."+appDirName)
+	appDir := configDir()
 
 	bm := &BotManager{
 		appDir:       appDir,
@@ -90,36 +101,9 @@ func (bm *BotManager) loadOrInit() {
 		NextPort: basePort + 1,
 	}
 
-	// Try to migrate from old ~/.nanobot config
-	home, _ := os.UserHomeDir()
-	oldConfig := filepath.Join(home, ".nanobot", "config.json")
-	if _, err := os.Stat(oldConfig); err == nil {
-		bm.migrateFromNanobot(oldConfig)
-	} else {
-		// Create a fresh default bot
-		bm.createBotLocked("Default Bot", "🐱")
-	}
-
+	// Create a fresh default bot
+	bm.createBotLocked("Default Bot", "🐱")
 	bm.saveLocked()
-}
-
-func (bm *BotManager) migrateFromNanobot(oldConfig string) {
-	bot := bm.createBotLocked("Default Bot", "🐱")
-
-	// Copy old config to new location
-	src, err := os.ReadFile(oldConfig)
-	if err == nil {
-		os.MkdirAll(filepath.Dir(bot.ConfigPath), 0755)
-		os.WriteFile(bot.ConfigPath, src, 0644)
-	}
-
-	// Point workspace to old location (avoid copying large dirs)
-	home, _ := os.UserHomeDir()
-	oldWorkspace := filepath.Join(home, ".nanobot", "workspace")
-	if _, err := os.Stat(oldWorkspace); err == nil {
-		bot.Workspace = oldWorkspace
-		bm.saveLocked()
-	}
 }
 
 // ==================== CRUD ====================
