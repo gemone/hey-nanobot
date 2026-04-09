@@ -119,7 +119,7 @@ func createMenu(app *App) *menu.Menu {
 	// Help menu
 	helpMenu := appMenu.AddSubmenu("Help")
 	helpMenu.AddText("nanobot Documentation", nil, func(_ *menu.CallbackData) {
-		app.OpenURL("https://github.com/nanobot-ai/nanobot")
+		app.OpenURL("https://github.com/HKUDS/nanobot")
 	})
 
 	return appMenu

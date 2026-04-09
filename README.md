@@ -25,7 +25,7 @@ Built with Go · Wails · Vue 3 · TypeScript
 
 ### What is Hey Nanobot?
 
-Hey Nanobot is a **desktop GUI** for [nanobot](https://github.com/nanobot-ai/nanobot) — an open-source AI assistant. It wraps the nanobot runtime with a native macOS/Windows/Linux experience, letting you manage bots, chat with AI, and monitor channels — all from one app.
+Hey Nanobot is a **desktop GUI** for [nanobot](https://github.com/HKUDS/nanobot) — an open-source AI assistant. It wraps the nanobot runtime with a native macOS/Windows/Linux experience, letting you manage bots, chat with AI, and monitor channels — all from one app.
 
 ### ✨ Features
 
@@ -83,7 +83,7 @@ hey-nanobot/
 - [Go](https://go.dev) 1.23+
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation/) v2.12+
 - [Node.js](https://nodejs.org) 18+ (fnm/nvm recommended)
-- [nanobot](https://github.com/nanobot-ai/nanobot) installed (`uv tool install nanobot-ai`)
+- [nanobot](https://github.com/HKUDS/nanobot) installed (`uv tool install nanobot-ai`)
 
 #### Development
 
@@ -160,7 +160,7 @@ MIT
 
 ### Hey Nanobot 是什么？
 
-Hey Nanobot 是 [nanobot](https://github.com/nanobot-ai/nanobot)（开源 AI 助手）的**桌面客户端**。它将 nanobot 运行时封装为原生桌面应用，让你在一个窗口内管理多个 Bot、与 AI 对话、监控消息频道。
+Hey Nanobot 是 [nanobot](https://github.com/HKUDS/nanobot)（开源 AI 助手）的**桌面客户端**。它将 nanobot 运行时封装为原生桌面应用，让你在一个窗口内管理多个 Bot、与 AI 对话、监控消息频道。
 
 ### ✨ 功能特性
 
@@ -218,7 +218,7 @@ hey-nanobot/
 - [Go](https://go.dev) 1.23+
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation/) v2.12+
 - [Node.js](https://nodejs.org) 18+（推荐 fnm/nvm）
-- [nanobot](https://github.com/nanobot-ai/nanobot) 已安装（`uv tool install nanobot-ai`）
+- [nanobot](https://github.com/HKUDS/nanobot) 已安装（`uv tool install nanobot-ai`）
 
 #### 开发模式
 
