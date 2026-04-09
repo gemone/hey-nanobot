@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "Hey Nanobot",
+    "multiBot": "多 Bot 管理"
+  },
+  "nav": {
+    "bots": "Bot 管理",
+    "chat": "对话",
+    "feed": "实时消息",
+    "channels": "渠道",
+    "sessions": "会话",
+    "providers": "服务商",
+    "config": "配置",
+    "gateway": "网关",
+    "system": "系统"
+  },
+  "bot": {
+    "manager": "🤖 Bot 管理",
+    "newBot": "新建 Bot",
+    "active": "活跃",
+    "running": "运行中",
+    "noBots": "还没有 Bot，创建一个开始使用。",
+    "createTitle": "创建新 Bot",
+    "botName": "Bot 名称",
+    "avatar": "头像",
+    "cancel": "取消",
+    "create": "创建",
+    "deleteTitle": "删除 Bot",
+    "deleteConfirm": "确定要删除 {name} 吗？",
+    "deleteWarning": "这将删除该 Bot 的配置和工作空间，无法恢复。",
+    "delete": "删除"
+  },
+  "setup": {
+    "welcome": "欢迎使用 Hey Nanobot",
+    "welcomeDesc": "你的个人 AI 助手桌面客户端。内置 nanobot 引擎，只需配置 AI 服务即可开始。",
+    "steps": {
+      "welcome": "欢迎",
+      "provider": "AI 服务商",
+      "channel": "消息渠道"
+    },
+    "engineReady": "✅ nanobot 引擎就绪",
+    "engineNotFound": "⚠️ 未检测到 nanobot 引擎，可先完成配置，后续在设置中指定路径。",
+    "startSetup": "开始配置",
+    "configureProvider": "配置 AI 服务商",
+    "providerDesc": "选择一个 AI 服务商并填入 API Key（必填）。",
+    "selectProvider": "选择 Provider",
+    "previous": "上一步",
+    "next": "下一步",
+    "configureChannel": "配置消息渠道",
+    "channelDesc": "选择一个消息平台，填入 Bot Token。（可选，可跳过）",
+    "selectChannel": "选择 Channel",
+    "finish": "完成配置",
+    "saveFailed": "配置保存失败："
+  },
+  "provider": {
+    "title": "🔑 服务商",
+    "apiKey": "API 密钥"
+  },
+  "channel": {
+    "title": "🔗 消息渠道",
+    "enabled": "已启用"
+  },
+  "config": {
+    "title": "⚙️ 配置",
+    "format": "格式化",
+    "save": "保存"
+  },
+  "gateway": {
+    "title": "🌐 网关",
+    "start": "启动",
+    "stop": "停止",
+    "restart": "重启",
+    "clearLogs": "清除日志",
+    "running": "运行中",
+    "stopped": "已停止",
+    "pid": "进程 ID",
+    "port": "端口",
+    "uptime": "运行时间",
+    "status": "状态",
+    "logs": "日志",
+    "noLogs": "暂无日志。"
+  },
+  "feed": {
+    "title": "📡 实时消息",
+    "noMessages": "暂无消息。启动网关以接收实时消息。",
+    "clear": "清除"
+  },
+  "sessions": {
+    "title": "📂 会话",
+    "noSessions": "未找到会话。",
+    "showInFinder": "在 Finder 中显示"
+  },
+  "chat": {
+    "title": "💬 对话",
+    "placeholder": "输入消息...",
+    "send": "发送",
+    "welcome": "你好！我是 nanobot 🐈。有什么可以帮你的？",
+    "noSession": "无活跃会话"
+  },
+  "system": {
+    "title": "ℹ️ 系统",
+    "nanobotEngine": "Nanobot 引擎",
+    "path": "路径",
+    "source": "来源",
+    "version": "版本",
+    "sourceBundled": "📦 内置",
+    "sourceExternal": "🌐 外部",
+    "sourceCustom": "🔧 自定义",
+    "sourceNone": "❌ 未找到",
+    "notFound": "未找到"
+  },
+  "common": {
+    "online": "在线",
+    "offline": "离线",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "ok": "确定"
+  }
+}

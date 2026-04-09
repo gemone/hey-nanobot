@@ -15,11 +15,15 @@
         class="app-sidebar"
         style="padding-top: 38px; -webkit-app-region: drag;"
       >
-        <!-- Brand -->
+        <!-- Brand + Language Toggle -->
         <div class="d-flex align-center ga-2 pa-4 pb-3">
           <span style="font-size: 22px;">🐈</span>
-          <span class="text-body-1 font-weight-bold">Hey Nanobot</span>
-          <span class="text-caption text-medium-emphasis ml-auto">v{{ appVersion }}</span>
+          <span class="text-body-1 font-weight-bold">{{ t('app.title') }}</span>
+          <v-spacer />
+          <v-btn icon size="x-small" variant="text" @click="onToggleLocale" class="locale-btn">
+            <span class="text-caption">{{ currentLocale === 'zh' ? 'EN' : '中' }}</span>
+          </v-btn>
+          <span class="text-caption text-medium-emphasis">v{{ appVersion }}</span>
         </div>
 
         <!-- Bot Switcher -->
@@ -32,10 +36,10 @@
             <span style="font-size: 18px;">{{ activeBot.avatar || '🐱' }}</span>
           </v-avatar>
           <div class="flex-grow-1" style="min-width: 0;">
-            <div class="text-body-2 font-weight-semibold text-truncate">{{ activeBot.name || 'No Bot' }}</div>
+            <div class="text-body-2 font-weight-semibold text-truncate">{{ activeBot.name || t('common.loading') }}</div>
             <div class="d-flex align-center ga-1 text-caption text-medium-emphasis">
               <span class="status-dot" :class="{ running: gatewayRunning }"></span>
-              {{ gatewayRunning ? 'Online' : 'Offline' }}
+              {{ gatewayRunning ? t('common.online') : t('common.offline') }}
             </div>
           </div>
           <v-icon size="16" color="grey">mdi-chevron-right</v-icon>
@@ -49,7 +53,7 @@
             :active="currentPage === item.id"
             @click="currentPage = item.id"
             :prepend-icon="item.mdiIcon"
-            :title="item.label"
+            :title="t(item.labelKey)"
             rounded="lg"
             active-color="primary"
             :slim="true"
@@ -64,7 +68,7 @@
         <template v-slot:append>
           <v-divider />
           <div class="pa-3 text-center text-caption text-medium-emphasis">
-            Hey Nanobot v{{ appVersion }} · Multi-Bot
+            Hey Nanobot v{{ appVersion }} · {{ t('app.multiBot') }}
           </div>
         </template>
       </v-navigation-drawer>
@@ -92,6 +96,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   GetConfig, SaveConfig, GetChannels, SetChannelField,
   GetProviders, SetProviderAPIKey, GetGatewayStatus,
@@ -113,15 +118,19 @@ import ConfigPage from './components/ConfigPage.vue'
 import GatewayPage from './components/GatewayPage.vue'
 import SystemPage from './components/SystemPage.vue'
 import SetupWizard from './components/SetupWizard.vue'
+import { toggleLocale, getLocale } from './i18n'
 
-const appVersion = '1.2.0'
+const { t } = useI18n()
+const currentLocale = ref(getLocale())
+
+const appVersion = '1.2.1'
 const drawer = ref(true)
 const currentPage = ref('chat')
 const channelMsgCount = ref(0)
 const showSetup = ref(false)
 
 // ====== Bot State ======
-const activeBot = ref<{ name: string; avatar: string; id: string }>({ name: 'Loading...', avatar: '🐱', id: '' })
+const activeBot = ref<{ name: string; avatar: string; id: string }>({ name: '', avatar: '🐱', id: '' })
 
 async function loadActiveBot() {
   try {
@@ -131,16 +140,22 @@ async function loadActiveBot() {
 }
 
 const navItems = computed(() => [
-  { id: 'bots', label: 'Bots', mdiIcon: 'mdi-robot-outline', badge: undefined },
-  { id: 'chat', label: 'Chat', mdiIcon: 'mdi-chat-outline', badge: undefined },
-  { id: 'feed', label: 'Live Feed', mdiIcon: 'mdi-broadcast', badge: channelMsgCount.value || undefined },
-  { id: 'channels', label: 'Channels', mdiIcon: 'mdi-link-variant', badge: undefined },
-  { id: 'sessions', label: 'Sessions', mdiIcon: 'mdi-folder-outline', badge: sessions.value.length || undefined },
-  { id: 'providers', label: 'Providers', mdiIcon: 'mdi-key-outline', badge: undefined },
-  { id: 'config', label: 'Config', mdiIcon: 'mdi-cog-outline', badge: undefined },
-  { id: 'gateway', label: 'Gateway', mdiIcon: 'mdi-web', badge: undefined },
-  { id: 'system', label: 'System', mdiIcon: 'mdi-information-outline', badge: undefined },
+  { id: 'bots', labelKey: 'nav.bots', mdiIcon: 'mdi-robot-outline', badge: undefined },
+  { id: 'chat', labelKey: 'nav.chat', mdiIcon: 'mdi-chat-outline', badge: undefined },
+  { id: 'feed', labelKey: 'nav.feed', mdiIcon: 'mdi-broadcast', badge: channelMsgCount.value || undefined },
+  { id: 'channels', labelKey: 'nav.channels', mdiIcon: 'mdi-link-variant', badge: undefined },
+  { id: 'sessions', labelKey: 'nav.sessions', mdiIcon: 'mdi-folder-outline', badge: sessions.value.length || undefined },
+  { id: 'providers', labelKey: 'nav.providers', mdiIcon: 'mdi-key-outline', badge: undefined },
+  { id: 'config', labelKey: 'nav.config', mdiIcon: 'mdi-cog-outline', badge: undefined },
+  { id: 'gateway', labelKey: 'nav.gateway', mdiIcon: 'mdi-web', badge: undefined },
+  { id: 'system', labelKey: 'nav.system', mdiIcon: 'mdi-information-outline', badge: undefined },
 ])
+
+// ====== Locale ======
+function onToggleLocale() {
+  const next = toggleLocale()
+  currentLocale.value = next
+}
 
 // ====== Config ======
 const configJson = ref('{}')
@@ -196,7 +211,6 @@ function openInFinder(path: string) { OpenInFinder(path) }
 
 function onSetupDone() {
   showSetup.value = false
-  // Reload everything
   loadActiveBot()
   loadConfig()
   loadChannels()
@@ -277,6 +291,11 @@ html, body {
 .bot-switcher:hover {
   border-color: #6c5ce7 !important;
   background: #2a2a48 !important;
+}
+
+/* Locale toggle button */
+.locale-btn {
+  -webkit-app-region: no-drag;
 }
 
 /* Fix Vuetify nav drawer border */

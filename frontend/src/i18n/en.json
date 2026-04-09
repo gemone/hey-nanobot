@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "Hey Nanobot",
+    "multiBot": "Multi-Bot"
+  },
+  "nav": {
+    "bots": "Bots",
+    "chat": "Chat",
+    "feed": "Live Feed",
+    "channels": "Channels",
+    "sessions": "Sessions",
+    "providers": "Providers",
+    "config": "Config",
+    "gateway": "Gateway",
+    "system": "System"
+  },
+  "bot": {
+    "manager": "🤖 Bot Manager",
+    "newBot": "New Bot",
+    "active": "Active",
+    "running": "Running",
+    "noBots": "No bots yet. Create one to get started.",
+    "createTitle": "Create New Bot",
+    "botName": "Bot Name",
+    "avatar": "Avatar",
+    "cancel": "Cancel",
+    "create": "Create",
+    "deleteTitle": "Delete Bot",
+    "deleteConfirm": "Are you sure you want to delete {name}?",
+    "deleteWarning": "This will remove the bot's config and workspace. This cannot be undone.",
+    "delete": "Delete"
+  },
+  "setup": {
+    "welcome": "Welcome to Hey Nanobot",
+    "welcomeDesc": "Your personal AI assistant desktop client. Built-in nanobot engine, just configure an AI service to get started.",
+    "steps": {
+      "welcome": "Welcome",
+      "provider": "AI Provider",
+      "channel": "Channel"
+    },
+    "engineReady": "✅ nanobot engine ready",
+    "engineNotFound": "⚠️ nanobot engine not detected. You can complete setup first and specify the path later in settings.",
+    "startSetup": "Get Started",
+    "configureProvider": "Configure AI Provider",
+    "providerDesc": "Select an AI provider and enter your API Key (required).",
+    "selectProvider": "Select Provider",
+    "previous": "Previous",
+    "next": "Next",
+    "configureChannel": "Configure Channel",
+    "channelDesc": "Select a messaging platform and enter the Bot Token. (Optional, can skip)",
+    "selectChannel": "Select Channel",
+    "finish": "Finish Setup",
+    "saveFailed": "Configuration save failed: "
+  },
+  "provider": {
+    "title": "🔑 Providers",
+    "apiKey": "API Key"
+  },
+  "channel": {
+    "title": "🔗 Channels",
+    "enabled": "Enabled"
+  },
+  "config": {
+    "title": "⚙️ Config",
+    "format": "Format",
+    "save": "Save"
+  },
+  "gateway": {
+    "title": "🌐 Gateway",
+    "start": "Start",
+    "stop": "Stop",
+    "restart": "Restart",
+    "clearLogs": "Clear Logs",
+    "running": "Running",
+    "stopped": "Stopped",
+    "pid": "PID",
+    "port": "Port",
+    "uptime": "Uptime",
+    "status": "Status",
+    "logs": "Logs",
+    "noLogs": "No logs yet."
+  },
+  "feed": {
+    "title": "📡 Live Feed",
+    "noMessages": "No messages yet. Start the gateway to receive live messages.",
+    "clear": "Clear"
+  },
+  "sessions": {
+    "title": "📂 Sessions",
+    "noSessions": "No sessions found.",
+    "showInFinder": "Show in Finder"
+  },
+  "chat": {
+    "title": "💬 Chat",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "welcome": "Hello! I'm nanobot 🐈. How can I help you?",
+    "noSession": "No active session"
+  },
+  "system": {
+    "title": "ℹ️ System",
+    "nanobotEngine": "Nanobot Engine",
+    "path": "Path",
+    "source": "Source",
+    "version": "Version",
+    "sourceBundled": "📦 Built-in",
+    "sourceExternal": "🌐 External",
+    "sourceCustom": "🔧 Custom",
+    "sourceNone": "❌ Not Found",
+    "notFound": "Not found"
+  },
+  "common": {
+    "online": "Online",
+    "offline": "Offline",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "ok": "OK"
+  }
+}

@@ -1,7 +1,7 @@
 <template>
   <div class="page-body">
     <div class="d-flex align-center justify-space-between mb-5">
-      <h2 class="text-body-1 font-weight-bold">🔑 Providers</h2>
+      <h2 class="text-body-1 font-weight-bold">{{ t('provider.title') }}</h2>
     </div>
     <v-row>
       <v-col v-for="(pv, name) in providers" :key="name" cols="12" sm="6" md="4" lg="3">
@@ -14,7 +14,7 @@
           <v-text-field
             :model-value="pv.api_key || ''"
             @update:model-value="$emit('set-key', name, $event)"
-            label="API Key"
+            :label="t('provider.apiKey')"
             variant="outlined"
             density="compact"
             hide-details
@@ -28,6 +28,9 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+
 defineProps<{ providers: Record<string, any> }>()
 defineEmits(['set-key'])
 </script>

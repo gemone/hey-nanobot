@@ -1,15 +1,15 @@
 <template>
   <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2 class="text-body-1 font-weight-bold">💬 Chat</h2>
-      <v-btn variant="text" size="small" prepend-icon="mdi-delete-outline" @click="clearChat">Clear</v-btn>
+      <h2 class="text-body-1 font-weight-bold">{{ t('chat.title') }}</h2>
+      <v-btn variant="text" size="small" prepend-icon="mdi-delete-outline" @click="clearChat">{{ t('feed.clear') }}</v-btn>
     </div>
 
     <div class="flex-grow-1 overflow-y-auto pa-4" ref="messagesEl">
       <!-- Empty state -->
       <div v-if="messages.length === 0" class="d-flex flex-column align-center justify-center" style="height: 100%; opacity: 0.4;">
         <span style="font-size: 48px;">🐈</span>
-        <span class="text-body-2 text-medium-emphasis mt-2">Send a message to nanobot</span>
+        <span class="text-body-2 text-medium-emphasis mt-2">{{ t('chat.welcome') }}</span>
       </div>
 
       <!-- Messages -->
@@ -37,7 +37,7 @@
           <span style="font-size: 14px;">🐈</span>
         </v-avatar>
         <v-card color="#1a1a30" rounded="lg" class="pa-3 text-body-2 text-medium-emphasis" style="font-style: italic; border: 1px solid #2a2a45;">
-          Thinking...
+          {{ t('common.loading') }}
         </v-card>
       </div>
     </div>
@@ -46,7 +46,7 @@
     <div class="d-flex ga-2 pa-3" style="border-top: 1px solid #2a2a45;">
       <v-text-field
         v-model="input"
-        placeholder="Message nanobot... (Enter to send)"
+        :placeholder="t('chat.placeholder')"
         variant="outlined"
         density="compact"
         hide-details
@@ -62,9 +62,12 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { SendMessage, GetMessages, ClearMessages } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import { marked } from 'marked'
+
+const { t } = useI18n()
 
 marked.setOptions({ breaks: true, gfm: true })
 

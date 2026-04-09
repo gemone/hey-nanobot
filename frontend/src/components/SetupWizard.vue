@@ -2,14 +2,14 @@
   <v-overlay :model-value="true" persistent class="d-flex align-center justify-center" style="z-index: 9999;">
     <v-card width="640" rounded="xl" class="setup-card">
       <!-- Stepper -->
-      <v-stepper v-model="step" :items="steps" hide-actions bg-color="transparent" flat>
+      <v-stepper v-model="step" :items="stepLabels" hide-actions bg-color="transparent" flat>
         <!-- Step 1: Welcome -->
         <template v-slot:item.1>
           <v-card-text class="text-center py-8">
             <div style="font-size: 64px;" class="mb-4">🐈</div>
-            <h2 class="text-h5 font-weight-bold mb-2">Welcome to Hey Nanobot</h2>
+            <h2 class="text-h5 font-weight-bold mb-2">{{ t('setup.welcome') }}</h2>
             <p class="text-body-2 text-medium-emphasis mb-6" style="max-width: 420px; margin: 0 auto;">
-              你的个人 AI 助手桌面客户端。内置 nanobot 引擎，只需配置 AI 服务即可开始。
+              {{ t('setup.welcomeDesc') }}
             </p>
             <!-- Nanobot status (informational) -->
             <v-alert
@@ -21,16 +21,10 @@
               <template v-slot:prepend>
                 <v-icon :icon="nanobotInfo.available ? 'mdi-check-circle' : 'mdi-information'" />
               </template>
-              <span v-if="nanobotInfo.available">
-                ✅ nanobot 引擎就绪
-                <span class="text-caption text-medium-emphasis ml-2">({{ nanobotInfo.source }})</span>
-              </span>
-              <span v-else>
-                ⚠️ 未检测到 nanobot 引擎，可先完成配置，后续在设置中指定路径
-              </span>
+              {{ nanobotInfo.available ? t('setup.engineReady') : t('setup.engineNotFound') }}
             </v-alert>
             <v-btn color="primary" size="large" rounded="lg" @click="step = 2">
-              开始配置
+              {{ t('setup.startSetup') }}
               <v-icon end>mdi-arrow-right</v-icon>
             </v-btn>
           </v-card-text>
@@ -39,15 +33,15 @@
         <!-- Step 2: Provider -->
         <template v-slot:item.2>
           <v-card-text class="py-6">
-            <h3 class="text-h6 mb-2">配置 AI Provider</h3>
-            <p class="text-body-2 text-medium-emphasis mb-4">选择一个 AI 服务商并填入 API Key（必填）。</p>
+            <h3 class="text-h6 mb-2">{{ t('setup.configureProvider') }}</h3>
+            <p class="text-body-2 text-medium-emphasis mb-4">{{ t('setup.providerDesc') }}</p>
 
             <v-select
               v-model="selectedProvider"
               :items="providerList"
               item-title="label"
               item-value="key"
-              label="选择 Provider"
+              :label="t('setup.selectProvider')"
               variant="outlined"
               density="comfortable"
               class="mb-4"
@@ -66,13 +60,13 @@
             />
 
             <div class="d-flex justify-space-between">
-              <v-btn variant="text" @click="step = 1">上一步</v-btn>
+              <v-btn variant="text" @click="step = 1">{{ t('setup.previous') }}</v-btn>
               <v-btn
                 color="primary"
                 @click="step = 3"
                 :disabled="!providerApiKey.trim()"
               >
-                下一步
+                {{ t('setup.next') }}
                 <v-icon end>mdi-arrow-right</v-icon>
               </v-btn>
             </div>
@@ -82,15 +76,15 @@
         <!-- Step 3: Channel (optional) -->
         <template v-slot:item.3>
           <v-card-text class="py-6">
-            <h3 class="text-h6 mb-2">配置消息渠道</h3>
-            <p class="text-body-2 text-medium-emphasis mb-4">选择一个消息平台，填入 Bot Token。（可选，可跳过）</p>
+            <h3 class="text-h6 mb-2">{{ t('setup.configureChannel') }}</h3>
+            <p class="text-body-2 text-medium-emphasis mb-4">{{ t('setup.channelDesc') }}</p>
 
             <v-select
               v-model="selectedChannel"
               :items="channelList"
               item-title="label"
               item-value="key"
-              label="选择 Channel"
+              :label="t('setup.selectChannel')"
               variant="outlined"
               density="comfortable"
               clearable
@@ -112,9 +106,9 @@
             </template>
 
             <div class="d-flex justify-space-between">
-              <v-btn variant="text" @click="step = 2">上一步</v-btn>
+              <v-btn variant="text" @click="step = 2">{{ t('setup.previous') }}</v-btn>
               <v-btn color="primary" @click="saveAndFinish" :loading="saving">
-                完成配置
+                {{ t('setup.finish') }}
                 <v-icon end>mdi-check</v-icon>
               </v-btn>
             </div>
@@ -127,16 +121,23 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   GetNanobotInfo,
   SetProviderAPIKey,
   SetChannelField,
 } from '../../wailsjs/go/main/App'
 
+const { t } = useI18n()
+
 const emit = defineEmits<{ (e: 'done'): void }>()
 
 const step = ref(1)
-const steps = ['欢迎', 'AI Provider', '消息渠道']
+const stepLabels = computed(() => [
+  t('setup.steps.welcome'),
+  t('setup.steps.provider'),
+  t('setup.steps.channel'),
+])
 
 // Nanobot info (informational)
 const nanobotInfo = ref<{ available: boolean; source: string; path: string }>({
@@ -161,7 +162,7 @@ const providerList = [
   { key: 'google', label: 'Google (Gemini)', keyLabel: 'Google AI API Key' },
   { key: 'deepseek', label: 'DeepSeek', keyLabel: 'DeepSeek API Key' },
   { key: 'openrouter', label: 'OpenRouter', keyLabel: 'OpenRouter API Key' },
-  { key: 'ollama', label: 'Ollama (本地)', keyLabel: 'Ollama Base URL' },
+  { key: 'ollama', label: 'Ollama', keyLabel: 'Ollama Base URL' },
 ]
 
 // Step 3: Channel
@@ -183,15 +184,15 @@ const channelList = [
     { key: 'bot_token', label: 'Bot Token (xoxb-...)', icon: 'mdi-key-variant' },
     { key: 'app_token', label: 'App Token (xapp-...)', icon: 'mdi-key-variant' },
   ]},
-  { key: 'feishu', label: '飞书 (Lark)', fields: [
+  { key: 'feishu', label: 'Lark / 飞书', fields: [
     { key: 'app_id', label: 'App ID', icon: 'mdi-identifier' },
     { key: 'app_secret', label: 'App Secret', icon: 'mdi-key-variant' },
   ]},
-  { key: 'dingtalk', label: '钉钉', fields: [
+  { key: 'dingtalk', label: 'DingTalk / 钉钉', fields: [
     { key: 'client_id', label: 'Client ID', icon: 'mdi-identifier' },
     { key: 'client_secret', label: 'Client Secret', icon: 'mdi-key-variant' },
   ]},
-  { key: 'wecom', label: '企业微信', fields: [
+  { key: 'wecom', label: 'WeCom / 企业微信', fields: [
     { key: 'corp_id', label: 'Corp ID', icon: 'mdi-identifier' },
     { key: 'agent_id', label: 'Agent ID', icon: 'mdi-identifier' },
     { key: 'secret', label: 'Secret', icon: 'mdi-key-variant' },
@@ -233,7 +234,7 @@ async function saveAndFinish() {
 
     emit('done')
   } catch (e) {
-    alert('配置保存失败: ' + e)
+    alert(t('setup.saveFailed') + e)
   }
   saving.value = false
 }

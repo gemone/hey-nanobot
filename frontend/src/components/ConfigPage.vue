@@ -1,10 +1,10 @@
 <template>
   <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2 class="text-body-1 font-weight-bold">⚙️ Config</h2>
+      <h2 class="text-body-1 font-weight-bold">{{ t('config.title') }}</h2>
       <div class="d-flex ga-2">
-        <v-btn variant="text" size="small" prepend-icon="mdi-content-copy" @click="formatConfig">Format</v-btn>
-        <v-btn color="primary" size="small" prepend-icon="mdi-content-save" @click="$emit('save', localConfig)">Save</v-btn>
+        <v-btn variant="text" size="small" prepend-icon="mdi-content-copy" @click="formatConfig">{{ t('config.format') }}</v-btn>
+        <v-btn color="primary" size="small" prepend-icon="mdi-content-save" @click="$emit('save', localConfig)">{{ t('config.save') }}</v-btn>
       </div>
     </div>
     <div class="flex-grow-1 pa-4">
@@ -21,6 +21,9 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{ configJson: string }>()
 const emit = defineEmits<{ (e: 'save', json: string): void }>()

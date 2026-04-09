@@ -1,26 +1,26 @@
 <template>
   <div class="page-body">
     <div class="d-flex align-center justify-space-between mb-5">
-      <h2 class="text-body-1 font-weight-bold">ℹ️ System</h2>
+      <h2 class="text-body-1 font-weight-bold">{{ t('system.title') }}</h2>
     </div>
 
     <!-- Nanobot Engine -->
     <v-card rounded="lg" class="mb-4" style="border: 1px solid #2a2a45;">
       <v-card-title class="text-body-2 font-weight-bold px-4 pt-3 pb-1">
         <v-icon size="16" class="mr-2">mdi-robot-outline</v-icon>
-        Nanobot Engine
+        {{ t('system.nanobotEngine') }}
       </v-card-title>
       <v-list bg-color="transparent" density="compact" class="pb-2">
         <v-list-item>
           <template v-slot:prepend><v-icon size="16" class="mr-3">mdi-file-outline</v-icon></template>
           <v-list-item-title class="text-body-2">
-            <strong>Path</strong>: <span class="text-medium-emphasis">{{ nanobotInfo.path || 'Not found' }}</span>
+            <strong>{{ t('system.path') }}</strong>: <span class="text-medium-emphasis">{{ nanobotInfo.path || t('system.notFound') }}</span>
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
           <template v-slot:prepend><v-icon size="16" class="mr-3">mdi-source-branch</v-icon></template>
           <v-list-item-title class="text-body-2">
-            <strong>Source</strong>:
+            <strong>{{ t('system.source') }}</strong>:
             <v-chip size="x-small" :color="sourceColor" variant="tonal" class="ml-1">
               {{ sourceLabel }}
             </v-chip>
@@ -29,7 +29,7 @@
         <v-list-item v-if="nanobotInfo.version">
           <template v-slot:prepend><v-icon size="16" class="mr-3">mdi-tag-outline</v-icon></template>
           <v-list-item-title class="text-body-2">
-            <strong>Version</strong>: <span class="text-medium-emphasis">{{ nanobotInfo.version }}</span>
+            <strong>{{ t('system.version') }}</strong>: <span class="text-medium-emphasis">{{ nanobotInfo.version }}</span>
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -53,7 +53,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   info: Record<string, string>
@@ -62,11 +64,13 @@ const props = defineProps<{
 
 const sourceLabel = computed(() => {
   const s = props.nanobotInfo?.source || 'none'
+  const key = 'system.source' + s.charAt(0).toUpperCase() + s.slice(1) as any
+  // Fallback to t() or raw
   const map: Record<string, string> = {
-    bundled: '📦 Built-in',
-    external: '🌐 External',
-    custom: '🔧 Custom',
-    none: '❌ Not Found',
+    bundled: t('system.sourceBundled'),
+    external: t('system.sourceExternal'),
+    custom: t('system.sourceCustom'),
+    none: t('system.sourceNone'),
   }
   return map[s] || s
 })

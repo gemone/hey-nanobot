@@ -1,22 +1,22 @@
 <template>
   <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2 class="text-body-1 font-weight-bold">📡 Live Feed</h2>
-      <v-btn variant="text" size="small" prepend-icon="mdi-notification-clear-all" @click="$emit('clear')">Clear</v-btn>
+      <h2 class="text-body-1 font-weight-bold">{{ t('feed.title') }}</h2>
+      <v-btn variant="text" size="small" prepend-icon="mdi-notification-clear-all" @click="$emit('clear')">{{ t('feed.clear') }}</v-btn>
     </div>
     <div class="flex-grow-1 overflow-y-auto pa-3">
       <div v-if="!gatewayRunning" class="d-flex flex-column align-center justify-center" style="height: 100%; opacity: 0.4;">
         <v-icon size="48" color="grey">mdi-web-off</v-icon>
-        <span class="text-body-2 text-medium-emphasis mt-2">Start Gateway to see messages</span>
+        <span class="text-body-2 text-medium-emphasis mt-2">{{ t('feed.noMessages') }}</span>
       </div>
       <div v-else-if="!messages.length" class="d-flex flex-column align-center justify-center" style="height: 100%; opacity: 0.4;">
         <v-icon size="48" color="grey">mdi-broadcast</v-icon>
-        <span class="text-body-2 text-medium-emphasis mt-2">Waiting for messages...</span>
+        <span class="text-body-2 text-medium-emphasis mt-2">{{ t('feed.noMessages') }}</span>
       </div>
       <template v-else>
         <div v-for="(msg, i) in messages" :key="i" class="d-flex ga-2 pa-2 rounded-lg mb-1 cursor-pointer" style="border: 1px solid transparent;" @mouseenter="$event.currentTarget.style.borderColor='#2a2a45'" @mouseleave="$event.currentTarget.style.borderColor='transparent'">
           <v-avatar size="28" rounded="circle" :color="channelColor(msg.channel)">
-            <span style="font-size: 14px;">{{ channelIcon(msg.channel) }}</span>
+            <span style="font-size: 14px;">{{ channelEmoji(msg.channel) }}</span>
           </v-avatar>
           <div class="flex-grow-1" style="min-width: 0;">
             <div class="d-flex align-center ga-2 mb-1">
@@ -33,12 +33,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+
 defineProps<{ gatewayRunning: boolean }>()
 defineEmits(['clear'])
 
 const messages = defineModel<any[]>('messages', { default: [] })
 
-function channelIcon(ch: string) {
+function channelEmoji(ch: string) {
   const m: Record<string, string> = { telegram: '✈️', discord: '🎮', slack: '💬', qq: '🐧', wecom: '💼', feishu: '🐦', dingtalk: '🔔', whatsapp: '📱', email: '📧' }
   return m[ch] || '📡'
 }
