@@ -26,12 +26,13 @@ jobs:
           - os: macos-latest
             platform: macos
             arch: amd64
-          - os: windows-latest
-            platform: windows
-            arch: amd64
           - os: ubuntu-22.04
             platform: linux
             arch: amd64
+          # Windows is temporarily disabled — PyInstaller issues with nanobot-ai deps
+          # - os: windows-latest
+          #   platform: windows
+          #   arch: amd64
 
     runs-on: ${{ matrix.os }}
     name: Build nanobot (${{ matrix.platform }}-${{ matrix.arch }})
@@ -44,8 +45,7 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install dependencies (Unix)
-        if: runner.os != 'Windows'
+      - name: Install dependencies
         run: |
           set -ex
           python3 -m venv /tmp/nanobot-env
@@ -56,20 +56,7 @@ jobs:
           python3 -m PyInstaller --version
           python3 -c "import site; print(site.getsitepackages()[0])"
 
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          python -m venv C:\nanobot-env
-          C:\nanobot-env\Scripts\activate
-          pip install --upgrade pip
-          pip install nanobot-ai pyinstaller
-          python -c "import nanobot; print('nanobot OK')"
-          python -m PyInstaller --version
-          python -c "import site; print(site.getsitepackages()[0])"
-        shell: pwsh
-
-      - name: Build nanobot binary (Unix)
-        if: runner.os != 'Windows'
+      - name: Build nanobot binary
         run: |
           set -ex
           source /tmp/nanobot-env/bin/activate
@@ -80,56 +67,26 @@ jobs:
           NANOBOT_PYTHON="$(which python3)" \
           python3 build_nano.py
 
-      - name: Build nanobot binary (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          C:\nanobot-env\Scripts\activate
-          $sitePkgs = python -c "import site; print(site.getsitepackages()[0])"
-          Write-Host "Site-packages: $sitePkgs"
-          $env:NANOBOT_ROOT = "C:\nanobot-env"
-          $env:NANOBOT_SITE_PACKAGES = $sitePkgs
-          $env:NANOBOT_PYTHON = "C:\nanobot-env\Scripts\python.exe"
-          python build_nano.py
-        shell: pwsh
-
-      - name: Verify binary (Unix)
-        if: runner.os != 'Windows'
+      - name: Verify binary
         run: |
           ls -lh nanobot-bin/
           ./nanobot-bin/nanobot --version
 
-      - name: Verify binary (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          ls nanobot-bin/
-          .\nanobot-bin\nanobot.exe --version
-        shell: pwsh
-
-      - name: Package (Unix)
-        if: runner.os != 'Windows'
+      - name: Package
         run: |
           mkdir -p dist/nanobot-bin
           cp nanobot-bin/nanobot dist/nanobot-bin/
           chmod +x dist/nanobot-bin/nanobot
           cd dist
           tar czf nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz nanobot-bin/
-
-      - name: Package (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          mkdir dist\nanobot-bin
-          copy nanobot-bin\nanobot.exe dist\nanobot-bin\
-          cd dist
-          Compress-Archive -Path nanobot-bin -DestinationPath nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
-        shell: pwsh
+          echo "Packaged:"
+          ls -lh nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: nanobot-${{ matrix.platform }}-${{ matrix.arch }}
-          path: |
-            dist/nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
-            dist/nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          path: dist/nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
 
   release:
@@ -159,7 +116,6 @@ jobs:
         run: |
           mkdir -p release
           find dist -name 'nanobot-*.tar.gz' -exec cp {} release/ \;
-          find dist -name 'nanobot-*.zip' -exec cp {} release/ \;
           ls -lh release/
 
       - name: Create or update GitHub Release
