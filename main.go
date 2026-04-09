@@ -19,7 +19,7 @@ func main() {
 	appMenu := createMenu(app)
 
 	err := wails.Run(&options.App{
-		Title:            "nanobot 🐈",
+		Title:            "Hey Nanobot 🐈",
 		Width:            1200,
 		Height:           800,
 		MinWidth:         800,
@@ -46,14 +46,14 @@ func main() {
 				HideToolbarSeparator:       true,
 			},
 			About: &mac.AboutInfo{
-				Title:   "nanobot Desktop",
+				Title:   "Hey Nanobot",
 				Message: "Personal AI Assistant 🐈\n\nPowered by nanobot-ai\nv1.1.0",
 			},
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 		},
 		SingleInstanceLock: &options.SingleInstanceLock{
-			UniqueId: "nanobot-desktop-e3b0c44298fc1c14",
+			UniqueId: "hey-nanobot-e3b0c44298fc1c14",
 		},
 	})
 
@@ -66,8 +66,8 @@ func createMenu(app *App) *menu.Menu {
 	appMenu := menu.NewMenu()
 
 	// App menu
-	fileMenu := appMenu.AddSubmenu("nanobot")
-	fileMenu.AddText("About nanobot", keys.CmdOrCtrl(""), func(_ *menu.CallbackData) {})
+	fileMenu := appMenu.AddSubmenu("Hey Nanobot")
+	fileMenu.AddText("About Hey Nanobot", keys.CmdOrCtrl(""), func(_ *menu.CallbackData) {})
 	fileMenu.AddSeparator()
 	fileMenu.AddText("Preferences...", keys.CmdOrCtrl(","), func(_ *menu.CallbackData) {
 		app.NavigateTo("config")

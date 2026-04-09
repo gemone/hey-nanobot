@@ -27,7 +27,7 @@
       <div class="card">
         <div class="card-header"><span class="card-title">🐈 About</span></div>
         <div style="font-size:13px; color:var(--text-secondary); line-height:1.6">
-          nanobot Desktop — Personal AI Assistant<br/>
+          Hey Nanobot — Personal AI Assistant<br/>
           Built with Go + Wails + Vue 3<br/>
           <span style="color:var(--text-muted); font-size:11px">v1.1.0 · {{ info.goVersion }}</span>
         </div>
