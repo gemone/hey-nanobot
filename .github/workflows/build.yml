@@ -18,11 +18,12 @@ jobs:
             arch: arm64
             ext: .app
             artifact: hey-nanobot-macos-arm64
-          - os: macos-13
+          - os: macos-latest
             platform: darwin
             arch: amd64
             ext: .app
             artifact: hey-nanobot-macos-amd64
+            cross: true
           - os: windows-latest
             platform: windows
             arch: amd64
@@ -104,7 +105,7 @@ jobs:
           cd dist
           # macOS arm64
           tar czf hey-nanobot-macos-arm64.tar.gz hey-nanobot-macos-arm64/
-          # macOS amd64
+          # macOS amd64 (cross-compiled from arm64)
           tar czf hey-nanobot-macos-amd64.tar.gz hey-nanobot-macos-amd64/
           # Windows
           zip -r hey-nanobot-windows-amd64.zip hey-nanobot-windows-amd64/

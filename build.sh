@@ -5,7 +5,7 @@
 #   ./build.sh darwin       # Build macOS arm64
 #   ./build.sh windows      # Build Windows amd64
 #   ./build.sh linux        # Build Linux amd64
-#   ./build.sh all          # Build all 3 platforms
+#   ./build.sh all          # Build all platforms (darwin arm64+amd64, windows, linux)
 #   ./build.sh nanobot      # Build nanobot binary with PyInstaller
 #   ./build.sh full         # Build nanobot + desktop app
 #   ./build.sh clean        # Clean build artifacts
@@ -140,10 +140,8 @@ build_all() {
     log "Building all platforms..."
     echo ""
 
-    # macOS arm64 (Apple Silicon)
+    # macOS arm64 (Apple Silicon) + amd64 (cross-compile from arm64)
     build_platform darwin arm64
-
-    # macOS amd64 (Intel)
     build_platform darwin amd64
 
     # Windows amd64
@@ -178,10 +176,6 @@ case "${1:-current}" in
         check_wails
         build_platform darwin arm64
         ;;
-    darwin-intel|macos-intel)
-        check_wails
-        build_platform darwin amd64
-        ;;
     windows|win)
         check_wails
         build_platform windows amd64
@@ -212,15 +206,14 @@ case "${1:-current}" in
         esac
         ;;
     *)
-        echo "Usage: $0 {nanobot|darwin|darwin-intel|windows|linux|all|full|clean}"
+        echo "Usage: $0 {nanobot|darwin|windows|linux|all|full|clean}"
         echo ""
         echo "Commands:"
         echo "  nanobot          Build nanobot binary with PyInstaller"
-        echo "  darwin           macOS Apple Silicon (arm64)"
-        echo "  darwin-intel     macOS Intel (amd64)"
+        echo "  darwin           macOS (arm64, cross-compiles amd64 in 'all')"
         echo "  windows          Windows (amd64)"
         echo "  linux            Linux (amd64)"
-        echo "  all              Build all platforms"
+        echo "  all              Build all platforms (darwin arm64+amd64, windows, linux)"
         echo "  full             Build nanobot + macOS arm64 app"
         echo "  clean            Remove build artifacts"
         exit 1
