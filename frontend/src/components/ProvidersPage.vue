@@ -104,23 +104,25 @@ const allProviders = [
 ]
 
 const providerList = computed<ProviderInfo[]>(() => {
-  return allProviders
-    .filter(name => {
-      const pv = providers.value[name]
-      // Show if has any config or is common
-      return pv && (pv.apiKey || pv.apiBase || pv.api_key || pv.api_base ||
-        ['openai', 'anthropic', 'google', 'deepseek', 'openrouter', 'ollama'].includes(name))
-    })
-    .map(name => {
-      const pv = providers.value[name] || {}
-      return {
-        name,
-        apiKey: pv.apiKey || pv.api_key || '',
-        apiBase: pv.apiBase || pv.api_base || '',
-        hasKey: !!(pv.apiKey || pv.api_key),
-        _hover: false,
-      }
-    })
+  const configured: ProviderInfo[] = []
+  const unconfigured: ProviderInfo[] = []
+  for (const name of allProviders) {
+    const pv = providers.value[name] || {}
+    const hasKey = !!(pv.apiKey || pv.api_key)
+    const info: ProviderInfo = {
+      name,
+      apiKey: pv.apiKey || pv.api_key || '',
+      apiBase: pv.apiBase || pv.api_base || '',
+      hasKey,
+      _hover: false,
+    }
+    if (hasKey || pv.apiBase || pv.api_base) {
+      configured.push(info)
+    } else {
+      unconfigured.push(info)
+    }
+  }
+  return [...configured, ...unconfigured]
 })
 
 const providerSelectItems = computed(() => [
