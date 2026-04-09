@@ -53,7 +53,7 @@
 
     <!-- Create Dialog -->
     <v-dialog v-model="showCreateModal" max-width="380">
-      <v-card rounded="xl" class="pa-5" color="#161628" style="border: 1px solid #222240;">
+      <v-card rounded="xl" class="pa-5" color="surface" style="border: 1px solid rgba(128,128,128,0.12);">
         <h3 class="text-subtitle-1 font-weight-bold mb-4">{{ t('bot.createTitle') }}</h3>
         <v-text-field v-model="formName" :label="t('bot.botName')" variant="outlined" density="compact" @keyup.enter="createBot" />
         <div class="mb-3">
@@ -74,7 +74,7 @@
 
     <!-- Edit Dialog -->
     <v-dialog v-model="showEditModal" max-width="380">
-      <v-card rounded="xl" class="pa-5" color="#161628" style="border: 1px solid #222240;">
+      <v-card rounded="xl" class="pa-5" color="surface" style="border: 1px solid rgba(128,128,128,0.12);">
         <h3 class="text-subtitle-1 font-weight-bold mb-4">{{ t('bot.editTitle') }}</h3>
         <v-text-field v-model="formName" :label="t('bot.botName')" variant="outlined" density="compact" />
         <div class="mb-3">
@@ -95,7 +95,7 @@
 
     <!-- Delete Dialog -->
     <v-dialog v-model="showDeleteModal" max-width="380">
-      <v-card rounded="xl" class="pa-5" color="#161628" style="border: 1px solid #222240;">
+      <v-card rounded="xl" class="pa-5" color="surface" style="border: 1px solid rgba(128,128,128,0.12);">
         <h3 class="text-subtitle-1 font-weight-bold mb-2">{{ t('bot.deleteTitle') }}</h3>
         <p class="text-body-2 mb-1">{{ t('bot.deleteConfirm', { name: deleteTarget?.name }) }}</p>
         <p class="text-caption" style="color: #5a5a78;">{{ t('bot.deleteWarning') }}</p>
@@ -157,5 +157,5 @@ onMounted(loadBots)
 
 <style scoped>
 .bots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
-.bot-active { border-color: rgba(108,92,231,0.4) !important; background: #161630 !important; }
+.bot-active { border-color: rgb(var(--v-theme-primary)) !important; }
 </style>

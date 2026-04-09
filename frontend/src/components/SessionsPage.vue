@@ -47,7 +47,7 @@
 
     <!-- Delete Dialog -->
     <v-dialog v-model="showDeleteModal" max-width="380">
-      <v-card rounded="xl" class="pa-5" color="#161628" style="border: 1px solid #222240;">
+      <v-card rounded="xl" class="pa-5" color="surface" style="border: 1px solid rgba(128,128,128,0.12);">
         <h3 class="text-subtitle-1 font-weight-bold mb-2">{{ t('sessions.deleteTitle') }}</h3>
         <p class="text-body-2 mb-4">{{ t('sessions.deleteConfirm', { name: deleteTarget?.key }) }}</p>
         <div class="d-flex justify-end ga-2">
@@ -99,5 +99,5 @@ onMounted(loadSessions)
 <style scoped>
 .session-list { display: flex; flex-direction: column; gap: 6px; }
 .session-item { padding: 10px 14px; cursor: pointer; display: flex; align-items: center; }
-.session-item:hover { background: #181832 !important; }
+.session-item:hover { background: rgb(var(--v-theme-surface-variant)) !important; }
 </style>

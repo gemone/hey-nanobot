@@ -39,15 +39,15 @@ function formatConfig() {
 <style scoped>
 .config-editor-textarea {
   width: 100%; height: 100%;
-  background: #0a0a14;
-  border: 1px solid #1e1e35;
+  background: rgb(var(--v-theme-background));
+  border: 1px solid rgba(128,128,128,0.12);
   border-radius: 8px;
-  color: #b0b0c8;
+  color: rgb(var(--v-theme-on-surface-variant));
   padding: 14px;
   font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
   font-size: 12px;
   line-height: 1.6;
   resize: none; outline: none; tab-size: 2;
 }
-.config-editor-textarea:focus { border-color: #6c5ce7; }
+.config-editor-textarea:focus { border-color: rgb(var(--v-theme-primary)); }
 </style>

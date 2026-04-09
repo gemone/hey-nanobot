@@ -62,26 +62,26 @@ defineEmits(['start', 'stop', 'restart', 'clear-logs'])
   gap: 8px;
 }
 .stat-card {
-  background: #161628;
-  border: 1px solid #222240;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(128,128,128,0.12);
   border-radius: 8px;
   padding: 12px;
   text-align: center;
 }
 .stat-card.stat-active {
-  border-color: rgba(0,206,201,0.3);
-  background: rgba(0,206,201,0.04);
+  border-color: rgb(var(--v-theme-success));
+  background: rgba(var(--v-theme-success), 0.06);
 }
 .stat-label { font-size: 10px; color: #5a5a78; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .stat-value { font-size: 16px; font-weight: 700; }
 .log-view {
-  background: #0a0a14;
-  border: 1px solid #1e1e35;
+  background: rgb(var(--v-theme-background));
+  border: 1px solid rgba(128,128,128,0.1);
   overflow-y: auto;
   font-family: 'SF Mono', 'Menlo', monospace;
   font-size: 11px;
   line-height: 1.5;
-  color: #7a7a98;
+  opacity: 0.7;
 }
 .log-view pre { white-space: pre-wrap; word-break: break-all; margin: 0; }
 </style>

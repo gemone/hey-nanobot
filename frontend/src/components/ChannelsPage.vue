@@ -130,5 +130,7 @@ onMounted(loadData)
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.channel-active { border-color: rgba(108,92,231,0.3) !important; }
+.channel-active { border-color: rgb(var(--v-theme-primary)) !important; opacity: 1; }
+.channel-grid .card-base { opacity: 0.85; }
+.channel-grid .card-base.channel-active { opacity: 1; }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-app style="background: #0f0f1a">
+  <v-app>
     <!-- Setup Wizard Overlay -->
     <SetupWizard v-if="showSetup" @done="onSetupDone" />
 
@@ -10,7 +10,7 @@
         v-model="drawer"
         :width="210"
         permanent
-        :color="'#12121f'"
+        color="surface"
         :border="true"
         class="app-sidebar"
         style="padding-top: 40px; -webkit-app-region: drag;"
@@ -20,6 +20,9 @@
           <span style="font-size: 20px;">🐈</span>
           <span class="text-subtitle-2 font-weight-bold" style="letter-spacing: -0.3px;">Hey Nanobot</span>
           <v-spacer />
+          <v-btn icon size="x-small" variant="text" @click="onToggleTheme" class="locale-btn" :title="isDark ? t('common.lightMode') : t('common.darkMode')">
+            <v-icon size="16">{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
+          </v-btn>
           <v-btn icon size="x-small" variant="text" @click="onToggleLocale" class="locale-btn" :title="currentLocale === 'zh' ? 'Switch to English' : '切换到中文'">
             <span class="text-caption font-weight-medium">{{ currentLocale === 'zh' ? 'EN' : '中' }}</span>
           </v-btn>
@@ -28,20 +31,19 @@
         <!-- Bot Switcher -->
         <div
           class="mx-3 my-2 pa-2 d-flex align-center ga-2 rounded-lg bot-switcher"
-          style="background: #181830; border: 1px solid #252540; -webkit-app-region: no-drag;"
           @click="currentPage = 'bots'"
         >
-          <v-avatar size="32" color="#1a1a30" rounded="lg">
+          <v-avatar size="32" rounded="lg" color="surface-variant">
             <span style="font-size: 16px;">{{ activeBot.avatar || '🐱' }}</span>
           </v-avatar>
           <div class="flex-grow-1" style="min-width: 0;">
             <div class="text-caption font-weight-semibold text-truncate">{{ activeBot.name || t('common.loading') }}</div>
-            <div class="d-flex align-center ga-1" style="font-size: 10px; color: #5a5a78;">
+            <div class="d-flex align-center ga-1" style="font-size: 10px; opacity: 0.5;">
               <span class="status-dot" :class="{ running: gatewayRunning }"></span>
               {{ gatewayRunning ? t('common.online') : t('common.offline') }}
             </div>
           </div>
-          <v-icon size="14" color="#5a5a78">mdi-chevron-right</v-icon>
+          <v-icon size="14" style="opacity: 0.4;">mdi-chevron-right</v-icon>
         </div>
 
         <!-- Nav Items -->
@@ -65,8 +67,8 @@
         </v-list>
 
         <template v-slot:append>
-          <v-divider color="#252540" />
-          <div class="pa-3 text-center" style="font-size: 10px; color: #3a3a58;">
+          <v-divider />
+          <div class="pa-3 text-center" style="font-size: 10px; opacity: 0.3;">
             v{{ appVersion }}
           </div>
         </template>
@@ -106,6 +108,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTheme } from 'vuetify'
 import {
   GetConfig, SaveConfig,
   GetGatewayStatus,
@@ -129,7 +132,23 @@ import SetupWizard from './components/SetupWizard.vue'
 import { toggleLocale, getLocale } from './i18n'
 
 const { t } = useI18n()
+const theme = useTheme()
 const currentLocale = ref(getLocale())
+
+// ====== Theme Toggle ======
+const isDark = computed(() => theme.global.current.value.dark)
+
+function onToggleTheme() {
+  const next = isDark.value ? 'light' : 'dark'
+  theme.global.name.value = next
+  localStorage.setItem('hey-nanobot-theme', next)
+}
+
+// Restore saved theme
+const savedTheme = localStorage.getItem('hey-nanobot-theme')
+if (savedTheme === 'light' || savedTheme === 'dark') {
+  theme.global.name.value = savedTheme
+}
 
 const appVersion = '1.3.0'
 const drawer = ref(true)
@@ -261,30 +280,32 @@ html, body { overflow: hidden; -webkit-user-select: none; user-select: none; }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #3a3a58; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #5a5a78; }
+::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
 
 /* Status dot */
 .status-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: #ff6b6b; flex-shrink: 0; display: inline-block;
+  background: rgb(var(--v-theme-error)); flex-shrink: 0; display: inline-block;
 }
 .status-dot.running {
-  background: #00cec9;
-  box-shadow: 0 0 5px #00cec9;
+  background: rgb(var(--v-theme-success));
+  box-shadow: 0 0 5px rgb(var(--v-theme-success));
   animation: pulse 2s ease-in-out infinite;
 }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
 
-/* Bot switcher hover */
-.bot-switcher:hover { border-color: #6c5ce7 !important; background: #1e1e38 !important; }
-.bot-switcher { transition: all 0.15s ease; }
+/* Bot switcher */
+.bot-switcher {
+  background: rgb(var(--v-theme-surface-variant));
+  border: 1px solid rgba(128,128,128,0.15);
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
+}
+.bot-switcher:hover { border-color: rgb(var(--v-theme-primary)) !important; }
 
 /* Locale toggle */
 .locale-btn { -webkit-app-region: no-drag; }
-
-/* Sidebar border fix */
-.app-sidebar .v-navigation-drawer__border { background-color: #1e1e35 !important; }
 
 /* Nav item custom */
 .nav-item-custom { min-height: 34px !important; margin-bottom: 1px !important; }
@@ -293,7 +314,7 @@ html, body { overflow: hidden; -webkit-user-select: none; user-select: none; }
 
 /* Nav badge */
 .nav-badge {
-  background: #ff6b6b; color: white;
+  background: rgb(var(--v-theme-error)); color: white;
   padding: 0 5px; border-radius: 8px;
   font-size: 10px; font-weight: 600;
   min-width: 16px; text-align: center; line-height: 16px;
@@ -302,10 +323,10 @@ html, body { overflow: hidden; -webkit-user-select: none; user-select: none; }
 /* Page header */
 .page-header {
   padding: 10px 20px;
-  border-bottom: 1px solid #1e1e35;
+  border-bottom: 1px solid rgba(128,128,128,0.12);
   display: flex; align-items: center;
   justify-content: space-between;
-  background: #0d0d18;
+  background: rgb(var(--v-theme-background));
   -webkit-app-region: drag;
   gap: 12px;
   min-height: 48px;
@@ -314,18 +335,16 @@ html, body { overflow: hidden; -webkit-user-select: none; user-select: none; }
 .page-header .actions { -webkit-app-region: no-drag; }
 
 /* Page body */
-.page-body {
-  flex: 1; overflow-y: auto; padding: 20px;
-}
+.page-body { flex: 1; overflow-y: auto; padding: 20px; }
 
 /* Card base */
 .card-base {
-  background: #161628;
-  border: 1px solid #222240;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(128,128,128,0.12);
   border-radius: 10px;
   transition: border-color 0.15s;
 }
-.card-base:hover { border-color: #6c5ce7; }
+.card-base:hover { border-color: rgb(var(--v-theme-primary)); }
 
 /* Snackbar overrides */
 .v-snackbar__content { padding: 8px 14px !important; }

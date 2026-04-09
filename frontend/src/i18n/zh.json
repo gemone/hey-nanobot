@@ -239,6 +239,8 @@
     "clearLogs": "清除日志",
     "restart": "重启",
     "start": "启动",
-    "stop": "停止"
+    "stop": "停止",
+    "darkMode": "深色模式",
+    "lightMode": "浅色模式"
   }
 }

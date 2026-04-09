@@ -128,12 +128,12 @@ onMounted(async () => {
   word-break: break-word;
 }
 .msg-bubble.user {
-  background: rgba(108,92,231,0.12);
-  border: 1px solid rgba(108,92,231,0.25);
+  background: rgba(var(--v-theme-primary), 0.1);
+  border: 1px solid rgba(var(--v-theme-primary), 0.2);
 }
 .msg-bubble.assistant {
-  background: #161628;
-  border: 1px solid #222240;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(128,128,128,0.1);
 }
 
 .streaming-cursor::after { content: '▊'; animation: blink 1s step-end infinite; color: #6c5ce7; }
@@ -149,7 +149,7 @@ onMounted(async () => {
 
 .chat-input-area {
   padding: 8px 16px;
-  border-top: 1px solid #1e1e35;
+  border-top: 1px solid rgba(128,128,128,0.1);
   display: flex;
   gap: 8px;
   align-items: center;

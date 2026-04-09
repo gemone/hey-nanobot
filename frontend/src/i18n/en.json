@@ -239,6 +239,8 @@
     "clearLogs": "Clear Logs",
     "restart": "Restart",
     "start": "Start",
-    "stop": "Stop"
+    "stop": "Stop",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode"
   }
 }

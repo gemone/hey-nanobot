@@ -54,7 +54,7 @@ function channelColor(ch: string) { return { telegram: '#0088cc', discord: '#586
   transition: background 0.15s;
   cursor: pointer;
 }
-.feed-item:hover { background: #161628; }
+.feed-item:hover { background: rgb(var(--v-theme-surface)); }
 .feed-avatar {
   width: 28px; height: 28px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;

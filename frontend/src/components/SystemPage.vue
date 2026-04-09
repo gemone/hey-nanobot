@@ -66,6 +66,6 @@ const sourceColor = computed(() => {
 <style scoped>
 .info-rows { display: flex; flex-direction: column; gap: 8px; }
 .info-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
-.info-key { font-size: 12px; color: #5a5a78; flex-shrink: 0; min-width: 70px; }
-.info-val { font-size: 12px; color: #b0b0c8; text-align: right; word-break: break-all; }
+.info-key { font-size: 12px; opacity: 0.5; flex-shrink: 0; min-width: 70px; }
+.info-val { font-size: 12px; opacity: 0.8; text-align: right; word-break: break-all; }
 </style>

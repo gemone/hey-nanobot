@@ -9,7 +9,7 @@
     </div>
 
     <!-- Agent Defaults -->
-    <div class="card-base pa-4 mb-4" style="border-color: rgba(108,92,231,0.35);">
+    <div class="card-base pa-4 mb-4 agent-defaults-card">
       <div class="d-flex align-center ga-2 mb-3">
         <v-icon size="16" color="primary">mdi-robot-outline</v-icon>
         <span class="text-caption font-weight-semibold" style="text-transform: uppercase; letter-spacing: 0.5px;">{{ t('provider.agentDefaults') }}</span>
@@ -217,4 +217,5 @@ onMounted(loadData)
   gap: 10px;
 }
 .rotate-90 { transform: rotate(90deg); }
+.agent-defaults-card { border-color: rgba(108,92,231,0.35); }
 </style>
