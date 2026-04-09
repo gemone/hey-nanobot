@@ -17,6 +17,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: true
       matrix:
         include:
           - os: macos-latest
@@ -43,69 +44,84 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install nanobot-ai + PyInstaller
-        shell: bash
+      - name: Install dependencies (Unix)
+        if: runner.os != 'Windows'
         run: |
           set -ex
           python3 -m venv /tmp/nanobot-env
-          source /tmp/nanobot-env/bin/activate 2>/dev/null || source /tmp/nanobot-env/Scripts/activate
+          source /tmp/nanobot-env/bin/activate
           pip install --upgrade pip
           pip install nanobot-ai pyinstaller
-          # Verify
           python3 -c "import nanobot; print('nanobot OK')"
           python3 -m PyInstaller --version
+          python3 -c "import site; print(site.getsitepackages()[0])"
 
-      - name: Build nanobot binary
-        shell: bash
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
         run: |
-          source /tmp/nanobot-env/bin/activate 2>/dev/null || source /tmp/nanobot-env/Scripts/activate
+          python -m venv C:\nanobot-env
+          C:\nanobot-env\Scripts\activate
+          pip install --upgrade pip
+          pip install nanobot-ai pyinstaller
+          python -c "import nanobot; print('nanobot OK')"
+          python -m PyInstaller --version
+          python -c "import site; print(site.getsitepackages()[0])"
+        shell: pwsh
 
-          # Find site-packages for the venv
+      - name: Build nanobot binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          set -ex
+          source /tmp/nanobot-env/bin/activate
           SITE_PKGS=$(python3 -c "import site; print(site.getsitepackages()[0])")
           echo "Site-packages: $SITE_PKGS"
-
-          # Run build_nano.py with env vars pointing to the venv
           NANOBOT_ROOT="/tmp/nanobot-env" \
           NANOBOT_SITE_PACKAGES="$SITE_PKGS" \
           NANOBOT_PYTHON="$(which python3)" \
           python3 build_nano.py
 
+      - name: Build nanobot binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          C:\nanobot-env\Scripts\activate
+          $sitePkgs = python -c "import site; print(site.getsitepackages()[0])"
+          Write-Host "Site-packages: $sitePkgs"
+          $env:NANOBOT_ROOT = "C:\nanobot-env"
+          $env:NANOBOT_SITE_PACKAGES = $sitePkgs
+          $env:NANOBOT_PYTHON = "C:\nanobot-env\Scripts\python.exe"
+          python build_nano.py
+        shell: pwsh
+
       - name: Verify binary (Unix)
-        if: matrix.platform != 'windows'
-        shell: bash
+        if: runner.os != 'Windows'
         run: |
           ls -lh nanobot-bin/
           ./nanobot-bin/nanobot --version
 
       - name: Verify binary (Windows)
-        if: matrix.platform == 'windows'
-        shell: pwsh
+        if: runner.os == 'Windows'
         run: |
           ls nanobot-bin/
           .\nanobot-bin\nanobot.exe --version
+        shell: pwsh
 
       - name: Package (Unix)
-        if: matrix.platform != 'windows'
-        shell: bash
+        if: runner.os != 'Windows'
         run: |
           mkdir -p dist/nanobot-bin
           cp nanobot-bin/nanobot dist/nanobot-bin/
           chmod +x dist/nanobot-bin/nanobot
           cd dist
           tar czf nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz nanobot-bin/
-          echo "Packaged:"
-          ls -lh nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
 
       - name: Package (Windows)
-        if: matrix.platform == 'windows'
-        shell: pwsh
+        if: runner.os == 'Windows'
         run: |
           mkdir dist\nanobot-bin
           copy nanobot-bin\nanobot.exe dist\nanobot-bin\
           cd dist
           Compress-Archive -Path nanobot-bin -DestinationPath nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
-          echo "Packaged:"
-          ls nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
+        shell: pwsh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
