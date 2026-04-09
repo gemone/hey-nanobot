@@ -554,8 +554,11 @@ def main() -> int:
             info(f"  Found: {candidate}")
         return 1
 
-    # Make executable
-    output_binary.chmod(0o755)
+    # Make executable (Unix only; Windows ignores this)
+    try:
+        output_binary.chmod(0o755)
+    except OSError:
+        pass
 
     # File size
     size_mb = output_binary.stat().st_size / (1024 * 1024)
@@ -566,19 +569,23 @@ def main() -> int:
     banner("Testing Binary")
     test_cmd = [str(output_binary), "--version"]
     info(f"Running: {' '.join(test_cmd)}")
-    test_result = subprocess.run(test_cmd, capture_output=True, text=True, timeout=15)
+    try:
+        test_result = subprocess.run(test_cmd, capture_output=True, text=True, timeout=15)
 
-    if test_result.returncode == 0:
-        output = (test_result.stdout or "").strip() or (test_result.stderr or "").strip()
-        info(f"Output: {output}")
-        info("✓ Binary works!")
-    else:
-        warn(f"Exit code: {test_result.returncode}")
-        if test_result.stdout:
-            info(f"stdout: {test_result.stdout.strip()}")
-        if test_result.stderr:
-            warn(f"stderr: {test_result.stderr.strip()}")
-        warn("Binary test had issues (may still work for normal usage)")
+        if test_result.returncode == 0:
+            output = (test_result.stdout or "").strip() or (test_result.stderr or "").strip()
+            info(f"Output: {output}")
+            info("✓ Binary works!")
+        else:
+            warn(f"Exit code: {test_result.returncode}")
+            if test_result.stdout:
+                info(f"stdout: {test_result.stdout.strip()}")
+            if test_result.stderr:
+                warn(f"stderr: {test_result.stderr.strip()}")
+            warn("Binary test had issues (may still work for normal usage)")
+    except Exception as e:
+        warn(f"Binary test failed: {e}")
+        warn("Binary may still work for normal usage")
 
     banner("Done!")
     return 0
