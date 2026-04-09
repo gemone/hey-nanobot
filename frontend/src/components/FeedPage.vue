@@ -1,93 +1,49 @@
 <template>
-  <div class="feed-container">
+  <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2>📡 Live Feed</h2>
-      <div class="actions">
-        <button class="btn btn-ghost btn-sm" @click="refresh">🔄</button>
-        <button class="btn btn-ghost btn-sm" @click="clearAll">🗑️ Clear</button>
-      </div>
+      <h2 class="text-body-1 font-weight-bold">📡 Live Feed</h2>
+      <v-btn variant="text" size="small" prepend-icon="mdi-notification-clear-all" @click="$emit('clear')">Clear</v-btn>
     </div>
-
-    <div class="feed-messages" ref="feedEl">
-      <div v-if="channelMsgs.length === 0" class="empty-state">
-        <span class="emoji">📡</span>
-        <span class="text">{{ gatewayRunning ? 'Waiting for messages...' : 'Start gateway to see live messages' }}</span>
+    <div class="flex-grow-1 overflow-y-auto pa-3">
+      <div v-if="!gatewayRunning" class="d-flex flex-column align-center justify-center" style="height: 100%; opacity: 0.4;">
+        <v-icon size="48" color="grey">mdi-web-off</v-icon>
+        <span class="text-body-2 text-medium-emphasis mt-2">Start Gateway to see messages</span>
       </div>
-
-      <div
-        v-for="(msg, i) in channelMsgs"
-        :key="i"
-        class="feed-item"
-      >
-        <div class="feed-icon">{{ getChannelIcon(msg.channel) }}</div>
-        <div class="feed-body">
-          <div class="feed-meta">
-            <span class="feed-channel" :class="getChannelClass(msg.channel)">
-              {{ msg.channel }}
-            </span>
-            <span class="feed-sender">{{ msg.sender_id || msg.role }}</span>
-            <span class="feed-time">{{ formatTime(msg.time) }}</span>
+      <div v-else-if="!messages.length" class="d-flex flex-column align-center justify-center" style="height: 100%; opacity: 0.4;">
+        <v-icon size="48" color="grey">mdi-broadcast</v-icon>
+        <span class="text-body-2 text-medium-emphasis mt-2">Waiting for messages...</span>
+      </div>
+      <template v-else>
+        <div v-for="(msg, i) in messages" :key="i" class="d-flex ga-2 pa-2 rounded-lg mb-1 cursor-pointer" style="border: 1px solid transparent;" @mouseenter="$event.currentTarget.style.borderColor='#2a2a45'" @mouseleave="$event.currentTarget.style.borderColor='transparent'">
+          <v-avatar size="28" rounded="circle" :color="channelColor(msg.channel)">
+            <span style="font-size: 14px;">{{ channelIcon(msg.channel) }}</span>
+          </v-avatar>
+          <div class="flex-grow-1" style="min-width: 0;">
+            <div class="d-flex align-center ga-2 mb-1">
+              <v-chip size="x-small" :color="channelColor(msg.channel)" variant="tonal" class="text-uppercase">{{ msg.channel }}</v-chip>
+              <span class="text-body-2 font-weight-semibold">{{ msg.sender }}</span>
+              <span class="text-caption text-medium-emphasis ml-auto">{{ msg.time }}</span>
+            </div>
+            <div class="text-body-2 text-medium-emphasis text-truncate">{{ msg.text }}</div>
           </div>
-          <div class="feed-text">{{ msg.content }}</div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted } from 'vue'
-import { GetChannelMessages, ClearChannelMessages } from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+defineProps<{ gatewayRunning: boolean }>()
+defineEmits(['clear'])
 
-const props = defineProps<{ gatewayRunning?: boolean }>()
+const messages = defineModel<any[]>('messages', { default: [] })
 
-const channelMsgs = ref<any[]>([])
-const feedEl = ref<HTMLDivElement>()
-
-function scrollToBottom() {
-  nextTick(() => {
-    if (feedEl.value) feedEl.value.scrollTop = feedEl.value.scrollHeight
-  })
+function channelIcon(ch: string) {
+  const m: Record<string, string> = { telegram: '✈️', discord: '🎮', slack: '💬', qq: '🐧', wecom: '💼', feishu: '🐦', dingtalk: '🔔', whatsapp: '📱', email: '📧' }
+  return m[ch] || '📡'
 }
-
-async function refresh() {
-  try {
-    channelMsgs.value = await GetChannelMessages()
-    scrollToBottom()
-  } catch {}
+function channelColor(ch: string) {
+  const m: Record<string, string> = { telegram: '#0088cc', discord: '#5865f2', slack: '#e01e5a', qq: '#12b7f5', wecom: '#07c160', feishu: '#3370ff', dingtalk: '#0089ff', whatsapp: '#25d366', email: '#ea4335' }
+  return m[ch] || '#6c5ce7'
 }
-
-async function clearAll() {
-  try {
-    await ClearChannelMessages()
-    channelMsgs.value = []
-  } catch {}
-}
-
-function getChannelIcon(ch: string): string {
-  const icons: Record<string, string> = {
-    telegram: '✈️', discord: '🎮', slack: '💼', qq: '🐧',
-    wecom: '🏢', feishu: '🪽', dingtalk: '🔔', whatsapp: '📱',
-    email: '📧', mochat: '🫧',
-  }
-  return icons[ch] || '📡'
-}
-
-function getChannelClass(ch: string): string {
-  return `ch-${ch}`
-}
-
-function formatTime(t: string): string {
-  if (!t) return ''
-  try { return new Date(t).toLocaleTimeString() } catch { return t }
-}
-
-onMounted(async () => {
-  await refresh()
-  EventsOn('channel:message', () => {
-    refresh()
-  })
-  EventsOn('channel:messages:cleared', () => { channelMsgs.value = [] })
-})
 </script>

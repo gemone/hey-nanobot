@@ -1,54 +1,58 @@
 <template>
-  <div>
+  <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2>🌐 Gateway</h2>
-      <div class="actions">
-        <button v-if="!status?.running" class="btn btn-success btn-sm" @click="$emit('start')">▶ Start</button>
-        <button v-else class="btn btn-danger btn-sm" @click="$emit('stop')">⏹ Stop</button>
-        <button class="btn btn-secondary btn-sm" @click="$emit('restart')" :disabled="!status?.running">🔄 Restart</button>
+      <h2 class="text-body-1 font-weight-bold">🌐 Gateway</h2>
+      <div class="d-flex ga-2">
+        <v-btn v-if="!status.running" color="success" size="small" prepend-icon="mdi-play" @click="$emit('start')">Start</v-btn>
+        <v-btn v-if="status.running" color="error" size="small" prepend-icon="mdi-stop" @click="$emit('stop')">Stop</v-btn>
+        <v-btn v-if="status.running" size="small" variant="outlined" prepend-icon="mdi-refresh" @click="$emit('restart')">Restart</v-btn>
       </div>
     </div>
-    <div class="page-body">
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-value" :style="{ color: status?.running ? 'var(--green)' : 'var(--red)' }">
-            {{ status?.running ? '● Online' : '● Offline' }}
-          </div>
-          <div class="stat-label">Status</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ status?.pid || '—' }}</div>
-          <div class="stat-label">PID</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ status?.port || '—' }}</div>
-          <div class="stat-label">Port</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ status?.uptime || '—' }}</div>
-          <div class="stat-label">Uptime</div>
-        </div>
-      </div>
 
-      <!-- Logs -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">📋 Logs</span>
-          <button class="btn btn-ghost btn-xs" @click="$emit('clear-logs')">Clear</button>
-        </div>
-        <div class="log-view" ref="logEl">{{ logs || 'No logs yet...' }}</div>
-      </div>
+    <!-- Stats -->
+    <div class="pa-4 pb-2">
+      <v-row>
+        <v-col cols="3">
+          <v-card rounded="lg" class="pa-3 text-center" color="#1a1a30" style="border: 1px solid #2a2a45;">
+            <div class="text-caption text-medium-emphasis mb-1">PID</div>
+            <div class="text-h6 font-weight-bold">{{ status.pid || '—' }}</div>
+          </v-card>
+        </v-col>
+        <v-col cols="3">
+          <v-card rounded="lg" class="pa-3 text-center" color="#1a1a30" style="border: 1px solid #2a2a45;">
+            <div class="text-caption text-medium-emphasis mb-1">Port</div>
+            <div class="text-h6 font-weight-bold">{{ status.port || '—' }}</div>
+          </v-card>
+        </v-col>
+        <v-col cols="3">
+          <v-card rounded="lg" class="pa-3 text-center" color="#1a1a30" style="border: 1px solid #2a2a45;">
+            <div class="text-caption text-medium-emphasis mb-1">Uptime</div>
+            <div class="text-h6 font-weight-bold">{{ status.uptime || '—' }}</div>
+          </v-card>
+        </v-col>
+        <v-col cols="3">
+          <v-card rounded="lg" class="pa-3 text-center" :color="status.running ? 'rgba(0,206,201,0.1)' : '#1a1a30'" style="border: 1px solid #2a2a45;">
+            <div class="text-caption text-medium-emphasis mb-1">Status</div>
+            <div class="text-h6 font-weight-bold" :color="status.running ? 'success' : 'error'">
+              {{ status.running ? 'Online' : 'Offline' }}
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
+
+    <!-- Logs -->
+    <div class="px-4 pb-1 d-flex align-center justify-space-between">
+      <span class="text-caption text-medium-emphasis">Logs</span>
+      <v-btn variant="text" size="x-small" prepend-icon="mdi-delete-sweep" @click="$emit('clear-logs')">Clear</v-btn>
+    </div>
+    <div class="flex-grow-1 mx-4 mb-4 pa-3 rounded-lg overflow-y-auto" style="background: #0f0f1a; border: 1px solid #2a2a45; font-family: 'SF Mono', monospace; font-size: 11px; line-height: 1.5;">
+      <pre style="white-space: pre-wrap; word-break: break-all; color: #9898b0;">{{ logs || 'No logs yet.' }}</pre>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
 defineProps<{ status: any; logs: string }>()
 defineEmits(['start', 'stop', 'restart', 'clear-logs'])
-const logEl = ref<HTMLDivElement>()
-watch(() => arguments, () => {
-  nextTick(() => { if (logEl.value) logEl.value.scrollTop = logEl.value.scrollHeight })
-})
 </script>

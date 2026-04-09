@@ -1,41 +1,61 @@
 <template>
-  <div class="chat-container">
+  <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2>💬 Chat</h2>
-      <div class="actions">
-        <button class="btn btn-ghost btn-sm" @click="clearChat">🗑️ Clear</button>
-      </div>
+      <h2 class="text-body-1 font-weight-bold">💬 Chat</h2>
+      <v-btn variant="text" size="small" prepend-icon="mdi-delete-outline" @click="clearChat">Clear</v-btn>
     </div>
 
-    <div class="chat-messages" ref="messagesEl">
-      <div v-if="messages.length === 0" class="empty-state">
-        <span class="emoji">🐈</span>
-        <span class="text">Send a message to nanobot</span>
+    <div class="flex-grow-1 overflow-y-auto pa-4" ref="messagesEl">
+      <!-- Empty state -->
+      <div v-if="messages.length === 0" class="d-flex flex-column align-center justify-center" style="height: 100%; opacity: 0.4;">
+        <span style="font-size: 48px;">🐈</span>
+        <span class="text-body-2 text-medium-emphasis mt-2">Send a message to nanobot</span>
       </div>
-      <div v-for="(msg) in messages" :key="msg.id" class="chat-message" :class="msg.role">
-        <div class="avatar">{{ msg.role === 'user' ? '👤' : '🐈' }}</div>
-        <div class="bubble">
-          <div v-if="msg.role === 'assistant'" class="md-content" v-html="renderMd(msg.content)"></div>
+
+      <!-- Messages -->
+      <div v-for="msg in messages" :key="msg.id" class="d-flex mb-3" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
+        <v-avatar size="28" :color="msg.role === 'user' ? '#74b9ff' : '#00cec9'" class="mr-2 mt-1 flex-shrink-0">
+          <span style="font-size: 14px;">{{ msg.role === 'user' ? '👤' : '🐈' }}</span>
+        </v-avatar>
+        <v-card
+          :color="msg.role === 'user' ? 'rgba(108,92,231,0.15)' : '#1a1a30'"
+          :style="msg.role === 'user' ? 'border: 1px solid #6c5ce7;' : 'border: 1px solid #2a2a45;'"
+          rounded="lg"
+          max-width="80%"
+          class="pa-3 text-body-2"
+          style="line-height: 1.6; word-break: break-word;"
+        >
+          <div v-if="msg.role === 'assistant'" class="md-content" v-html="renderMd(msg.content)" style="user-select: text; -webkit-user-select: text;"></div>
           <template v-else>{{ msg.content }}</template>
           <span v-if="msg.streaming" class="streaming-cursor"></span>
-        </div>
+        </v-card>
       </div>
-      <div v-if="loading && !streamingId" class="chat-message assistant">
-        <div class="avatar">🐈</div>
-        <div class="bubble" style="color: var(--text-muted); font-style: italic;">Thinking...</div>
+
+      <!-- Thinking -->
+      <div v-if="loading && !streamingId" class="d-flex">
+        <v-avatar size="28" color="#00cec9" class="mr-2 mt-1">
+          <span style="font-size: 14px;">🐈</span>
+        </v-avatar>
+        <v-card color="#1a1a30" rounded="lg" class="pa-3 text-body-2 text-medium-emphasis" style="font-style: italic; border: 1px solid #2a2a45;">
+          Thinking...
+        </v-card>
       </div>
     </div>
 
-    <div class="chat-input-area">
-      <input
+    <!-- Input -->
+    <div class="d-flex ga-2 pa-3" style="border-top: 1px solid #2a2a45;">
+      <v-text-field
         v-model="input"
         placeholder="Message nanobot... (Enter to send)"
-        @keydown.enter="send"
+        variant="outlined"
+        density="compact"
+        hide-details
         :disabled="loading"
+        @keydown.enter="send"
       />
-      <button class="btn btn-primary" @click="send" :disabled="loading || !input.trim()">
-        {{ loading ? '⏳' : '➤' }} Send
-      </button>
+      <v-btn color="primary" @click="send" :disabled="loading || !input.trim()" icon>
+        <v-icon>{{ loading ? 'mdi-hourglass-empty' : 'mdi-send' }}</v-icon>
+      </v-btn>
     </div>
   </div>
 </template>
@@ -46,19 +66,12 @@ import { SendMessage, GetMessages, ClearMessages } from '../../wailsjs/go/main/A
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import { marked } from 'marked'
 
-// Configure marked for safe rendering
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-})
+marked.setOptions({ breaks: true, gfm: true })
 
 function renderMd(text: string): string {
   if (!text) return ''
-  try {
-    return marked.parse(text) as string
-  } catch {
-    return text
-  }
+  try { return marked.parse(text) as string }
+  catch { return text }
 }
 
 const input = ref('')
@@ -119,3 +132,27 @@ onMounted(async () => {
   })
 })
 </script>
+
+<style scoped>
+.streaming-cursor::after {
+  content: '▊'; animation: blink 1s step-end infinite; color: #6c5ce7;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+.md-content :deep(p) { margin: 0 0 6px; }
+.md-content :deep(p:last-child) { margin-bottom: 0; }
+.md-content :deep(code) {
+  background: #252540; padding: 1px 4px; border-radius: 3px;
+  font-size: 12px; font-family: 'SF Mono', monospace;
+}
+.md-content :deep(pre) {
+  background: #0f0f1a; padding: 8px; border-radius: 6px;
+  overflow-x: auto; margin: 6px 0;
+}
+.md-content :deep(pre code) { background: none; padding: 0; }
+.md-content :deep(ul), .md-content :deep(ol) { padding-left: 20px; margin: 4px 0; }
+.md-content :deep(blockquote) {
+  border-left: 3px solid #6c5ce7; padding-left: 10px; margin: 6px 0;
+  color: #9898b0;
+}
+</style>

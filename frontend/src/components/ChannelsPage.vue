@@ -1,34 +1,40 @@
 <template>
-  <div>
-    <div class="page-header">
-      <h2>🔗 Channels</h2>
+  <div class="page-body">
+    <div class="d-flex align-center justify-space-between mb-5">
+      <h2 class="text-body-1 font-weight-bold">🔗 Channels</h2>
     </div>
-    <div class="page-body">
-      <div class="channel-grid">
-        <div v-for="(config, name) in channels" :key="name" class="channel-card">
-          <div class="ch-header">
-            <span class="ch-name">
-              <span class="ch-icon">{{ getChannelIcon(name) }}</span>
-              {{ name }}
-            </span>
-            <label class="toggle">
-              <input type="checkbox" :checked="config.enabled"
-                @change="$emit('toggle-channel', name, ($event.target as HTMLInputElement).checked)" />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="ch-fields">
-            <div v-for="field in getEditableFields(name, config)" :key="field.key" class="field-row">
-              <label>{{ field.label }}</label>
-              <input class="form-input" style="flex:1; padding:4px 8px; font-size:11px;"
-                :type="field.secret ? 'password' : 'text'"
-                :value="field.value" :placeholder="field.placeholder"
-                @change="$emit('update-field', name, field.key, ($event.target as HTMLInputElement).value)" />
+    <v-row>
+      <v-col v-for="(ch, name) in channels" :key="name" cols="12" sm="6" md="4" lg="3">
+        <v-card rounded="lg" class="pa-4" style="border: 1px solid #2a2a45;" @mouseenter="$event.currentTarget.style.borderColor='#6c5ce7'" @mouseleave="$event.currentTarget.style.borderColor='#2a2a45'">
+          <div class="d-flex align-center justify-space-between mb-3">
+            <div class="d-flex align-center ga-2">
+              <span style="font-size: 18px;">{{ channelIcon(name) }}</span>
+              <span class="text-body-2 font-weight-semibold text-capitalize">{{ name }}</span>
             </div>
+            <v-switch
+              :model-value="ch.enabled"
+              @update:model-value="$emit('toggle-channel', name, $event)"
+              density="compact"
+              hide-details
+              color="success"
+            />
           </div>
-        </div>
-      </div>
-    </div>
+          <div class="d-flex flex-column ga-2">
+            <v-text-field
+              v-for="(val, field) in filterFields(ch)"
+              :key="field"
+              :model-value="val"
+              @update:model-value="$emit('update-field', name, field, $event)"
+              :label="field"
+              variant="outlined"
+              density="compact"
+              hide-details
+              :type="field.includes('secret') || field.includes('token') || field.includes('key') ? 'password' : 'text'"
+            />
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -36,61 +42,13 @@
 defineProps<{ channels: Record<string, any> }>()
 defineEmits(['toggle-channel', 'update-field'])
 
-function getChannelIcon(name: string): string {
-  const icons: Record<string, string> = {
-    telegram: '✈️', discord: '🎮', slack: '💼', qq: '🐧',
-    wecom: '🏢', feishu: '🪽', dingtalk: '🔔', whatsapp: '📱',
-    email: '📧', mochat: '🫧',
-  }
-  return icons[name] || '📡'
+function channelIcon(name: string) {
+  const m: Record<string, string> = { telegram: '✈️', discord: '🎮', slack: '💬', qq: '🐧', wecom: '💼', feishu: '🐦', dingtalk: '🔔', whatsapp: '📱', email: '📧', matrix: '🟢' }
+  return m[name] || '📡'
 }
 
-interface FieldDef { key: string; label: string; value: string; placeholder: string; secret: boolean }
-
-function getEditableFields(name: string, config: any): FieldDef[] {
-  const defs: Record<string, { key: string; label: string; secret?: boolean; placeholder?: string }[]> = {
-    telegram: [
-      { key: 'token', label: 'Token', secret: true, placeholder: '123456:ABC-DEF...' },
-      { key: 'proxy', label: 'Proxy', placeholder: 'socks5://...' },
-    ],
-    discord: [{ key: 'token', label: 'Token', secret: true }],
-    slack: [
-      { key: 'botToken', label: 'Bot Token', secret: true },
-      { key: 'appToken', label: 'App Token', secret: true },
-    ],
-    qq: [
-      { key: 'appId', label: 'App ID' },
-      { key: 'secret', label: 'Secret', secret: true },
-    ],
-    wecom: [
-      { key: 'botId', label: 'Bot ID' },
-      { key: 'secret', label: 'Secret', secret: true },
-    ],
-    feishu: [
-      { key: 'appId', label: 'App ID' },
-      { key: 'appSecret', label: 'App Secret', secret: true },
-    ],
-    dingtalk: [
-      { key: 'clientId', label: 'Client ID' },
-      { key: 'clientSecret', label: 'Secret', secret: true },
-    ],
-    email: [
-      { key: 'imapHost', label: 'IMAP Host' },
-      { key: 'imapUsername', label: 'User' },
-      { key: 'imapPassword', label: 'Pass', secret: true },
-      { key: 'smtpHost', label: 'SMTP Host' },
-    ],
-    whatsapp: [
-      { key: 'bridgeUrl', label: 'Bridge URL' },
-      { key: 'bridgeToken', label: 'Token', secret: true },
-    ],
-    mochat: [{ key: 'clawToken', label: 'Claw Token', secret: true }],
-  }
-  return (defs[name] || []).map(d => ({
-    key: d.key, label: d.label,
-    value: String(config[d.key] || ''),
-    placeholder: d.placeholder || '',
-    secret: d.secret || false,
-  }))
+function filterFields(ch: any) {
+  const { enabled, ...rest } = ch
+  return rest
 }
 </script>

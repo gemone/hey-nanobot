@@ -1138,3 +1138,132 @@ func bytesIndexByte(s []byte, c byte) int {
 }
 
 var _ io.Writer = (*LineWriter)(nil)
+
+// ==================== Setup Wizard Bindings ====================
+
+// CheckNanobotInstalled checks if nanobot binary is available
+func (a *App) CheckNanobotInstalled() string {
+	path, err := findNanobot()
+	if err != nil {
+		return ""
+	}
+	return path
+}
+
+// GetSetupState returns whether setup is needed
+func (a *App) GetSetupState() map[string]interface{} {
+	result := map[string]interface{}{
+		"needsSetup":  false,
+		"nanobotPath": "",
+		"hasProvider": false,
+		"hasChannel":  false,
+	}
+
+	// Check nanobot
+	if path, err := findNanobot(); err == nil {
+		result["nanobotPath"] = path
+	} else {
+		result["needsSetup"] = true
+	}
+
+	// Check config
+	configPath := a.activeConfigPath()
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		result["needsSetup"] = true
+		return result
+	}
+	var raw map[string]interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		result["needsSetup"] = true
+		return result
+	}
+
+	// Check providers
+	if providers, ok := raw["providers"].(map[string]interface{}); ok {
+		for _, p := range providers {
+			if cfg, ok := p.(map[string]interface{}); ok {
+				if key, ok := cfg["api_key"].(string); ok && key != "" {
+					result["hasProvider"] = true
+					break
+				}
+				if key, ok := cfg["apiKey"].(string); ok && key != "" {
+					result["hasProvider"] = true
+					break
+				}
+			}
+		}
+	}
+	if !result["hasProvider"].(bool) {
+		result["needsSetup"] = true
+	}
+
+	// Check channels
+	if channels, ok := raw["channels"].(map[string]interface{}); ok {
+		for _, ch := range channels {
+			if cfg, ok := ch.(map[string]interface{}); ok {
+				if enabled, ok := cfg["enabled"].(bool); ok && enabled {
+					result["hasChannel"] = true
+					break
+				}
+			}
+		}
+	}
+	if !result["hasChannel"].(bool) {
+		result["needsSetup"] = true
+	}
+
+	return result
+}
+
+// SetupSaveConfig saves config during setup wizard (creates if needed)
+func (a *App) SetupSaveConfig(providersJson string, channelsJson string) error {
+	configPath := a.activeConfigPath()
+
+	// Ensure directory exists
+	os.MkdirAll(filepath.Dir(configPath), 0755)
+
+	// Load existing or create new
+	raw := map[string]interface{}{}
+	if data, err := os.ReadFile(configPath); err == nil {
+		json.Unmarshal(data, &raw)
+	}
+
+	// Merge providers
+	if providersJson != "" {
+		var providers map[string]interface{}
+		if err := json.Unmarshal([]byte(providersJson), &providers); err == nil {
+			if raw["providers"] == nil {
+				raw["providers"] = map[string]interface{}{}
+			}
+			if existing, ok := raw["providers"].(map[string]interface{}); ok {
+				for k, v := range providers {
+					existing[k] = v
+				}
+			}
+		}
+	}
+
+	// Merge channels
+	if channelsJson != "" {
+		var channels map[string]interface{}
+		if err := json.Unmarshal([]byte(channelsJson), &channels); err == nil {
+			if raw["channels"] == nil {
+				raw["channels"] = map[string]interface{}{}
+			}
+			if existing, ok := raw["channels"].(map[string]interface{}); ok {
+				for k, v := range channels {
+					existing[k] = v
+				}
+			}
+		}
+	}
+
+	// Ensure model field
+	if raw["model"] == nil {
+		raw["model"] = "gpt-4o-mini"
+	}
+
+	data, _ := json.MarshalIndent(raw, "", "  ")
+	return os.WriteFile(configPath, data, 0644)
+}

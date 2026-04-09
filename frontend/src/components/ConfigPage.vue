@@ -1,50 +1,36 @@
 <template>
-  <div style="display:flex; flex-direction:column; height:100%">
+  <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2>⚙️ Config</h2>
-      <div class="actions">
-        <button class="btn btn-ghost btn-sm" @click="formatJson">📐 Format</button>
-        <button class="btn btn-primary btn-sm" @click="save" :disabled="saving">
-          {{ saving ? '⏳' : '💾' }} Save
-        </button>
+      <h2 class="text-body-1 font-weight-bold">⚙️ Config</h2>
+      <div class="d-flex ga-2">
+        <v-btn variant="text" size="small" prepend-icon="mdi-content-copy" @click="formatConfig">Format</v-btn>
+        <v-btn color="primary" size="small" prepend-icon="mdi-content-save" @click="$emit('save', localConfig)">Save</v-btn>
       </div>
     </div>
-    <div class="page-body" style="display:flex; flex-direction:column; height:calc(100% - 52px)">
-      <div class="config-editor" style="flex:1; display:flex; flex-direction:column">
-        <textarea v-model="localConfig" spellcheck="false"
-          @keydown.ctrl.s.prevent="save" @keydown.meta.s.prevent="save" />
-        <div v-if="error" style="color:var(--red); font-size:11px; padding:6px 0">❌ {{ error }}</div>
-      </div>
+    <div class="flex-grow-1 pa-4">
+      <v-textarea
+        v-model="localConfig"
+        auto-grow
+        variant="outlined"
+        hide-details
+        style="font-family: 'SF Mono', Monaco, Menlo, monospace; font-size: 12px; line-height: 1.6;"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { SaveConfig } from '../../wailsjs/go/main/App'
 
 const props = defineProps<{ configJson: string }>()
-const emit = defineEmits(['save'])
+const emit = defineEmits<{ (e: 'save', json: string): void }>()
+
 const localConfig = ref(props.configJson)
-const saving = ref(false)
-const error = ref('')
+watch(() => props.configJson, (v) => { localConfig.value = v })
 
-watch(() => props.configJson, (val) => { localConfig.value = val })
-
-function formatJson() {
+function formatConfig() {
   try {
-    const parsed = JSON.parse(localConfig.value)
-    localConfig.value = JSON.stringify(parsed, null, 2)
-    error.value = ''
-  } catch (e) { error.value = 'Invalid JSON: ' + e }
-}
-
-async function save() {
-  error.value = ''
-  try { JSON.parse(localConfig.value) } catch (e) { error.value = 'Invalid JSON: ' + e; return }
-  saving.value = true
-  try { await SaveConfig(localConfig.value); emit('save', localConfig.value) }
-  catch (e) { error.value = String(e) }
-  saving.value = false
+    localConfig.value = JSON.stringify(JSON.parse(localConfig.value), null, 2)
+  } catch {}
 }
 </script>

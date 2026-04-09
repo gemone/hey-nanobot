@@ -1,34 +1,38 @@
 <template>
-  <div>
-    <div class="page-header">
-      <h2>📂 Sessions</h2>
+  <div class="page-body">
+    <div class="d-flex align-center justify-space-between mb-5">
+      <h2 class="text-body-1 font-weight-bold">📂 Sessions</h2>
+      <v-chip size="small" variant="tonal" color="primary">{{ sessions.length }} sessions</v-chip>
     </div>
-    <div class="page-body">
-      <div v-if="sessions.length === 0" class="empty-state">
-        <span class="emoji">📂</span>
-        <span class="text">No sessions found</span>
-      </div>
-      <div class="session-list">
-        <div v-for="session in sessions" :key="session.key" class="session-item"
-          @click="$emit('open-in-finder', session.path)">
-          <div>
-            <div class="s-key">{{ session.key }}</div>
-            <div class="s-time">{{ formatTime(session.updated_at) }}</div>
-          </div>
-          <span style="color:var(--text-muted)">📁</span>
-        </div>
-      </div>
+    <v-list bg-color="transparent" density="compact" rounded="lg">
+      <v-list-item
+        v-for="s in sessions"
+        :key="s.key"
+        @click="$emit('open-in-finder', s.path || s.key)"
+        rounded="lg"
+        class="mb-1"
+      >
+        <template v-slot:prepend>
+          <v-icon size="18" class="mr-2">mdi-file-document-outline</v-icon>
+        </template>
+        <v-list-item-title class="text-body-2">{{ s.key }}</v-list-item-title>
+        <v-list-item-subtitle class="text-caption text-medium-emphasis">
+          {{ s.channel || 'unknown' }} · {{ s.messages || 0 }} msgs
+        </v-list-item-subtitle>
+        <template v-slot:append>
+          <v-btn icon size="x-small" variant="text">
+            <v-icon size="14">mdi-open-in-new</v-icon>
+          </v-btn>
+        </template>
+      </v-list-item>
+    </v-list>
+    <div v-if="!sessions.length" class="text-center py-12 text-body-2 text-medium-emphasis">
+      No sessions yet
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { GetSessions } from '../../wailsjs/go/main/App'
 defineProps<{ sessions: any[] }>()
 defineEmits(['open-in-finder'])
-function refresh() { GetSessions() }
-function formatTime(iso: string): string {
-  if (!iso) return ''
-  try { return new Date(iso).toLocaleString() } catch { return iso }
-}
 </script>
