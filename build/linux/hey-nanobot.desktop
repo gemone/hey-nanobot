@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Hey Nanobot
+Comment=Personal AI Assistant 🐈
+Exec=hey-nanobot
+Icon=hey-nanobot
+Terminal=false
+Categories=Utility;Network;
+StartupWMClass=Hey Nanobot

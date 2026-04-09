@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/menu"
@@ -10,6 +11,9 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
+
+// Version is set via -ldflags at build time
+var version = "dev"
 
 //go:embed all:frontend/dist
 var assets embed.FS
@@ -47,7 +51,7 @@ func main() {
 			},
 			About: &mac.AboutInfo{
 				Title:   "Hey Nanobot",
-				Message: "Personal AI Assistant 🐈\n\nPowered by nanobot-ai\nv1.1.0",
+				Message: fmt.Sprintf("Personal AI Assistant 🐈\n\nPowered by nanobot-ai\nv%s", version),
 			},
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,

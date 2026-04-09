@@ -4,8 +4,6 @@ frontend/node_modules/
 
 # Build output
 build/bin/
-build/windows/
-build/linux/
 
 # IDE
 .vscode/
@@ -24,9 +22,8 @@ Thumbs.db
 *.out
 vendor/
 
-# Wails
+# Wails generated
 frontend/dist/
-frontend/wailsjs/
 
 # Env
 .env
