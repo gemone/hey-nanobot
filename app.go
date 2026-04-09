@@ -1027,7 +1027,20 @@ func findNanobot() (string, error) {
 		}
 	}
 
-	// 1. Check bundled binary (next to the executable)
+	// 1. Check standard install directory (~/.local/share/hey-nanobot/bin/)
+	home, _ := os.UserHomeDir()
+	if home != "" {
+		binName := "nanobot"
+		if goRuntime.GOOS == "windows" {
+			binName = "nanobot.exe"
+		}
+		standardPath := filepath.Join(home, ".local", "share", "hey-nanobot", "bin", binName)
+		if _, err := os.Stat(standardPath); err == nil {
+			return standardPath, nil
+		}
+	}
+
+	// 2. Check bundled binary (legacy — next to the executable)
 	if exe, err := os.Executable(); err == nil {
 		bundled := filepath.Join(filepath.Dir(exe), "nanobot-bin", "nanobot")
 		if goRuntime.GOOS == "windows" {
@@ -1043,13 +1056,12 @@ func findNanobot() (string, error) {
 		}
 	}
 
-	// 2. Check PATH
+	// 3. Check PATH
 	if path, err := exec.LookPath("nanobot"); err == nil {
 		return path, nil
 	}
 
-	// 3. Check common install locations
-	home, _ := os.UserHomeDir()
+	// 4. Check common install locations
 	candidates := []string{
 		filepath.Join(home, ".local", "bin", "nanobot"),
 	}
@@ -1205,28 +1217,33 @@ func (a *App) GetNanobotInfo() map[string]interface{} {
 		if path, err := findNanobot(); err == nil {
 			result["path"] = path
 			result["available"] = true
+
 			// Determine source
-			if exe, err := os.Executable(); err == nil {
-				bundled := filepath.Join(filepath.Dir(exe), "nanobot-bin")
-				if goRuntime.GOOS == "windows" {
-					bundled += "\\nanobot.exe"
-				} else {
-					bundled += "/nanobot"
-				}
-				if path == bundled {
-					result["source"] = "bundled"
-				} else {
-					resources := filepath.Join(filepath.Dir(exe), "..", "Resources", "nanobot-bin")
-					if goRuntime.GOOS == "windows" {
-						resources += "\\nanobot.exe"
-					} else {
-						resources += "/nanobot"
-					}
-					if path == resources {
+			home, _ := os.UserHomeDir()
+			binName := "nanobot"
+			if goRuntime.GOOS == "windows" {
+				binName = "nanobot.exe"
+			}
+			standardPath := filepath.Join(home, ".local", "share", "hey-nanobot", "bin", binName)
+			if path == standardPath {
+				result["source"] = "standard"
+			}
+
+			// Check bundled (legacy)
+			if result["source"] == "none" {
+				if exe, err := os.Executable(); err == nil {
+					bundled := filepath.Join(filepath.Dir(exe), "nanobot-bin", binName)
+					if path == bundled {
 						result["source"] = "bundled"
+					} else {
+						resources := filepath.Join(filepath.Dir(exe), "..", "Resources", "nanobot-bin", binName)
+						if path == resources {
+							result["source"] = "bundled"
+						}
 					}
 				}
 			}
+
 			if result["source"] == "none" {
 				result["source"] = "external"
 			}

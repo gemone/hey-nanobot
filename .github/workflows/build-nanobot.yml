@@ -1,0 +1,132 @@
+name: Build Nanobot Binary
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'build_nano.py'
+      - 'build_nano.spec'
+      - '.github/workflows/build-nanobot.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.2.3)'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: macos
+            arch: arm64
+          - os: macos-latest
+            platform: macos
+            arch: amd64
+          - os: windows-latest
+            platform: windows
+            arch: amd64
+          - os: ubuntu-22.04
+            platform: linux
+            arch: amd64
+
+    runs-on: ${{ matrix.os }}
+    name: Build nanobot (${{ matrix.platform }}-${{ matrix.arch }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install nanobot-ai + PyInstaller
+        run: |
+          pip install pipx
+          pipx install uv
+          uv tool install nanobot-ai
+          # Install PyInstaller into nanobot's env
+          uv pip install --python $(uv tool dir nanobot-ai)/bin/python3 pyinstaller
+        shell: bash
+
+      - name: Build nanobot binary (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          PYTHON="$(uv tool dir nanobot-ai)/bin/python3"
+          "$PYTHON" build_nano.py
+        shell: bash
+
+      - name: Build nanobot binary (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          $python = "$(uv tool dir nanobot-ai)\bin\python3.exe"
+          if (-not (Test-Path $python)) { $python = "$(uv tool dir nanobot-ai)\Scripts\python.exe" }
+          & $python build_nano.py
+        shell: pwsh
+
+      - name: Package (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          mkdir -p dist/nanobot-bin
+          cp nanobot-bin/nanobot dist/nanobot-bin/
+          chmod +x dist/nanobot-bin/nanobot
+          cd dist
+          tar czf nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz nanobot-bin/
+
+      - name: Package (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          mkdir dist\nanobot-bin
+          copy nanobot-bin\nanobot.exe dist\nanobot-bin\
+          cd dist
+          Compress-Archive -Path nanobot-bin -DestinationPath nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nanobot-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            dist/nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+            dist/nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.inputs.version, 'v') || startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: nanobot-*
+
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          find dist -name 'nanobot-*.tar.gz' -exec cp {} release/ \;
+          find dist -name 'nanobot-*.zip' -exec cp {} release/ \;
+          ls -lh release/
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: release/nanobot-*
+          generate_release_notes: true

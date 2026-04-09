@@ -103,9 +103,10 @@
     "path": "Path",
     "source": "Source",
     "version": "Version",
-    "sourceBundled": "📦 Built-in",
-    "sourceExternal": "🌐 External",
-    "sourceCustom": "🔧 Custom",
+    "sourceStandard": "📦 Standard Install",
+    "sourceBundled": "📦 Built-in (Legacy)",
+    "sourceExternal": "🌐 External (PATH)",
+    "sourceCustom": "🔧 Custom Path",
     "sourceNone": "❌ Not Found",
     "notFound": "Not found"
   },

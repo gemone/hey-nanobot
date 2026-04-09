@@ -103,9 +103,10 @@
     "path": "路径",
     "source": "来源",
     "version": "版本",
-    "sourceBundled": "📦 内置",
-    "sourceExternal": "🌐 外部",
-    "sourceCustom": "🔧 自定义",
+    "sourceStandard": "📦 标准安装",
+    "sourceBundled": "📦 内置（旧版）",
+    "sourceExternal": "🌐 外部（PATH）",
+    "sourceCustom": "🔧 自定义路径",
     "sourceNone": "❌ 未找到",
     "notFound": "未找到"
   },

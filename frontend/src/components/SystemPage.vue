@@ -64,9 +64,8 @@ const props = defineProps<{
 
 const sourceLabel = computed(() => {
   const s = props.nanobotInfo?.source || 'none'
-  const key = 'system.source' + s.charAt(0).toUpperCase() + s.slice(1) as any
-  // Fallback to t() or raw
   const map: Record<string, string> = {
+    standard: t('system.sourceStandard'),
     bundled: t('system.sourceBundled'),
     external: t('system.sourceExternal'),
     custom: t('system.sourceCustom'),
@@ -78,7 +77,8 @@ const sourceLabel = computed(() => {
 const sourceColor = computed(() => {
   const s = props.nanobotInfo?.source || 'none'
   const map: Record<string, string> = {
-    bundled: 'success',
+    standard: 'success',
+    bundled: 'info',
     external: 'info',
     custom: 'warning',
     none: 'error',

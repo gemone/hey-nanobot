@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
-# build.sh — Cross-platform build script for Hey Nanobot
+# build.sh — Build script for Hey Nanobot desktop app
 # Usage:
 #   ./build.sh              # Build current platform
 #   ./build.sh darwin       # Build macOS arm64
 #   ./build.sh windows      # Build Windows amd64
 #   ./build.sh linux        # Build Linux amd64
-#   ./build.sh all          # Build all platforms (darwin arm64+amd64, windows, linux)
-#   ./build.sh nanobot      # Build nanobot binary with PyInstaller
-#   ./build.sh full         # Build nanobot + desktop app
+#   ./build.sh all          # Build all platforms
 #   ./build.sh clean        # Clean build artifacts
 
 set -euo pipefail
 cd "$(dirname "$0")"
 
 APP_NAME="hey-nanobot"
-VERSION="1.2.0"
+VERSION="${1:-1.2.3}"
+# If first arg is a command (not a version), use default version
+case "$VERSION" in
+    darwin|windows|linux|all|clean|current|"") VERSION="1.2.3" ;;
+esac
 BUILD_DIR="build/bin"
 LDFLAGS="-s -w -X main.version=${VERSION}"
-NANOBOT_SRC="nanobot-bin/nanobot"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -39,29 +40,6 @@ check_wails() {
     log "Using Wails: $($WAILS_CMD version 2>/dev/null | head -1)"
 }
 
-# Embed nanobot binary into the build output
-embed_nanobot() {
-    local platform="$1"
-    local target_dir="$2"
-
-    local nano_bin="$NANOBOT_SRC"
-    if [ "$platform" = "windows" ]; then
-        nano_bin="${NANOBOT_SRC}.exe"
-    fi
-
-    if [ ! -f "$nano_bin" ]; then
-        warn "nanobot binary not found at $nano_bin — skipping embed"
-        warn "Run './build.sh nanobot' first to build it"
-        return
-    fi
-
-    local dest="$target_dir/nanobot-bin"
-    mkdir -p "$dest"
-    cp -f "$nano_bin" "$dest/"
-    chmod +x "$dest/"*
-    log "Embedded nanobot binary → $dest/"
-}
-
 build_platform() {
     local os="$1"
     local arch="${2:-amd64}"
@@ -73,7 +51,6 @@ build_platform() {
             GOOS=darwin GOARCH=$arch $WAILS_CMD build -ldflags "$LDFLAGS" -platform "darwin/$arch"
             local out="${BUILD_DIR}/${APP_NAME}.app"
             if [ -d "$out" ]; then
-                embed_nanobot "darwin" "$out/Contents/Resources"
                 local size=$(du -sh "$out" | cut -f1)
                 log "✅ macOS ($arch): $out ($size)"
             fi
@@ -82,7 +59,6 @@ build_platform() {
             GOOS=windows GOARCH=$arch $WAILS_CMD build -ldflags "$LDFLAGS" -platform "windows/$arch"
             local out="${BUILD_DIR}/${APP_NAME}.exe"
             if [ -f "$out" ]; then
-                embed_nanobot "windows" "$(dirname "$out")"
                 local size=$(ls -lh "$out" | awk '{print $5}')
                 log "✅ Windows ($arch): $out ($size)"
             fi
@@ -91,7 +67,6 @@ build_platform() {
             GOOS=linux GOARCH=$arch $WAILS_CMD build -ldflags "$LDFLAGS" -platform "linux/$arch"
             local out="${BUILD_DIR}/${APP_NAME}"
             if [ -f "$out" ]; then
-                embed_nanobot "linux" "$BUILD_DIR"
                 cp -f build/linux/hey-nanobot.desktop "${BUILD_DIR}/" 2>/dev/null || true
                 local size=$(ls -lh "$out" | awk '{print $5}')
                 log "✅ Linux ($arch): $out ($size)"
@@ -104,50 +79,13 @@ build_platform() {
     esac
 }
 
-build_nanobot() {
-    log "Building nanobot binary with PyInstaller..."
-    if [ ! -f "build_nano.py" ]; then
-        err "build_nano.py not found"
-        exit 1
-    fi
-
-    # Find nanobot-ai Python
-    local nano_python="$HOME/.local/share/uv/tools/nanobot-ai/bin/python3"
-    if [ ! -f "$nano_python" ]; then
-        err "nanobot-ai Python not found at $nano_python"
-        err "Install: uv tool install nanobot-ai"
-        exit 1
-    fi
-
-    # Check pyinstaller
-    if ! $nano_python -c "import PyInstaller" 2>/dev/null; then
-        log "Installing PyInstaller into nanobot environment..."
-        uv pip install --python "$nano_python" pyinstaller 2>&1 | tail -3
-    fi
-
-    $nano_python build_nano.py 2>&1
-
-    if [ -f "$NANOBOT_SRC" ]; then
-        local size=$(ls -lh "$NANOBOT_SRC" | awk '{print $5}')
-        log "✅ nanobot binary: $NANOBOT_SRC ($size)"
-    else
-        err "PyInstaller build failed"
-        exit 1
-    fi
-}
-
 build_all() {
     log "Building all platforms..."
     echo ""
 
-    # macOS arm64 (Apple Silicon) + amd64 (cross-compile from arm64)
     build_platform darwin arm64
     build_platform darwin amd64
-
-    # Windows amd64
     build_platform windows amd64
-
-    # Linux amd64
     build_platform linux amd64
 
     echo ""
@@ -161,17 +99,12 @@ clean() {
     find build/bin -type f -delete 2>/dev/null
     find build/bin -type l -delete 2>/dev/null
     find build/bin -type d -empty -delete 2>/dev/null
-    find build_nanobot -type f -delete 2>/dev/null
-    find build_nanobot -type d -empty -delete 2>/dev/null
     log "✅ Cleaned"
 }
 
 # ====== Main ======
 
 case "${1:-current}" in
-    nanobot|nano)
-        build_nanobot
-        ;;
     darwin|macos)
         check_wails
         build_platform darwin arm64
@@ -188,11 +121,6 @@ case "${1:-current}" in
         check_wails
         build_all
         ;;
-    full)
-        build_nanobot
-        check_wails
-        build_platform darwin arm64
-        ;;
     clean)
         clean
         ;;
@@ -206,16 +134,16 @@ case "${1:-current}" in
         esac
         ;;
     *)
-        echo "Usage: $0 {nanobot|darwin|windows|linux|all|full|clean}"
+        echo "Usage: $0 {darwin|windows|linux|all|clean}"
         echo ""
         echo "Commands:"
-        echo "  nanobot          Build nanobot binary with PyInstaller"
-        echo "  darwin           macOS (arm64, cross-compiles amd64 in 'all')"
+        echo "  darwin           macOS (arm64)"
         echo "  windows          Windows (amd64)"
         echo "  linux            Linux (amd64)"
-        echo "  all              Build all platforms (darwin arm64+amd64, windows, linux)"
-        echo "  full             Build nanobot + macOS arm64 app"
+        echo "  all              Build all platforms"
         echo "  clean            Remove build artifacts"
+        echo ""
+        echo "Nanobot binary is installed separately via install.sh"
         exit 1
         ;;
 esac
