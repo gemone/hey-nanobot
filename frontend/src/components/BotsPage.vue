@@ -120,7 +120,7 @@ async function createBot() {
     newBotAvatar.value = '🐱'
     showCreateModal.value = false
     await loadBots()
-  } catch (e) { alert(e) }
+  } catch (e) { alert(t('common.error') + ': ' + e) }
 }
 
 function confirmDelete(bot: BotInfo) {

@@ -2,7 +2,7 @@
   <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
       <h2 class="text-body-1 font-weight-bold">{{ t('chat.title') }}</h2>
-      <v-btn variant="text" size="small" prepend-icon="mdi-delete-outline" @click="clearChat">{{ t('feed.clear') }}</v-btn>
+      <v-btn variant="text" size="small" prepend-icon="mdi-delete-outline" @click="clearChat">{{ t('chat.clear') }}</v-btn>
     </div>
 
     <div class="flex-grow-1 overflow-y-auto pa-4" ref="messagesEl">
@@ -97,7 +97,7 @@ async function send() {
   scrollToBottom()
   try { await SendMessage(msg) }
   catch (e) {
-    messages.value.push({ id: 'err', role: 'assistant', content: `Error: ${e}`, streaming: false })
+    messages.value.push({ id: 'err', role: 'assistant', content: t('chat.error', { error: String(e) }), streaming: false })
   }
   loading.value = false
   scrollToBottom()

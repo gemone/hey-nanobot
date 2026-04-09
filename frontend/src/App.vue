@@ -162,7 +162,7 @@ const configJson = ref('{}')
 async function loadConfig() { try { configJson.value = await GetConfig() } catch {} }
 async function saveConfig(json: string) {
   try { await SaveConfig(json); configJson.value = json }
-  catch (e) { alert('Save failed: ' + e) }
+  catch (e) { alert(t('common.saveFailed') + e) }
 }
 
 // ====== Channels ======
@@ -180,7 +180,7 @@ const providers = ref<Record<string, any>>({})
 async function loadProviders() { try { providers.value = await GetProviders() } catch {} }
 async function setProviderKey(provider: string, key: string) {
   try { await SetProviderAPIKey(provider, key); await loadProviders() }
-  catch (e) { alert('Failed: ' + e) }
+  catch (e) { alert(t('common.operationFailed') + e) }
 }
 
 // ====== Gateway ======
@@ -188,9 +188,9 @@ const gatewayStatus = ref<any>({ running: false })
 const gatewayRunning = computed(() => gatewayStatus.value?.running || false)
 const gatewayLogs = ref('')
 async function loadGatewayStatus() { try { gatewayStatus.value = await GetGatewayStatus() } catch {} }
-async function startGateway() { try { await StartGateway(); await loadGatewayStatus() } catch (e) { alert(e) } }
-async function stopGateway() { try { await StopGateway(); await loadGatewayStatus() } catch (e) { alert(e) } }
-async function restartGateway() { try { await RestartGateway(); await loadGatewayStatus() } catch (e) { alert(e) } }
+async function startGateway() { try { await StartGateway(); await loadGatewayStatus() } catch (e) { alert(t('common.error') + ': ' + e) } }
+async function stopGateway() { try { await StopGateway(); await loadGatewayStatus() } catch (e) { alert(t('common.error') + ': ' + e) } }
+async function restartGateway() { try { await RestartGateway(); await loadGatewayStatus() } catch (e) { alert(t('common.error') + ': ' + e) } }
 async function clearLogs() { try { await ClearGatewayLogs(); gatewayLogs.value = '' } catch {} }
 
 // ====== Sessions ======

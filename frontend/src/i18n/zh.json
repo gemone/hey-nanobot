@@ -50,7 +50,50 @@
     "channelDesc": "选择一个消息平台，填入 Bot Token。（可选，可跳过）",
     "selectChannel": "选择 Channel",
     "finish": "完成配置",
-    "saveFailed": "配置保存失败："
+    "saveFailed": "配置保存失败：",
+    "providers": {
+      "openai": { "label": "OpenAI", "keyLabel": "OpenAI API Key" },
+      "anthropic": { "label": "Anthropic (Claude)", "keyLabel": "Anthropic API Key" },
+      "google": { "label": "Google (Gemini)", "keyLabel": "Google AI API Key" },
+      "deepseek": { "label": "DeepSeek", "keyLabel": "DeepSeek API Key" },
+      "openrouter": { "label": "OpenRouter", "keyLabel": "OpenRouter API Key" },
+      "ollama": { "label": "Ollama (本地)", "keyLabel": "Ollama Base URL" }
+    },
+    "channels": {
+      "telegram": {
+        "label": "Telegram",
+        "fields": { "token": "Bot Token" }
+      },
+      "discord": {
+        "label": "Discord",
+        "fields": { "token": "Bot Token" }
+      },
+      "qq": {
+        "label": "QQ",
+        "fields": { "app_id": "App ID", "app_secret": "App Secret" }
+      },
+      "slack": {
+        "label": "Slack",
+        "fields": { "bot_token": "Bot Token (xoxb-...)", "app_token": "App Token (xapp-...)" }
+      },
+      "feishu": {
+        "label": "飞书",
+        "fields": { "app_id": "App ID", "app_secret": "App Secret" }
+      },
+      "dingtalk": {
+        "label": "钉钉",
+        "fields": { "client_id": "Client ID", "client_secret": "Client Secret" }
+      },
+      "wecom": {
+        "label": "企业微信",
+        "fields": { "corp_id": "企业 ID", "agent_id": "应用 ID", "secret": "Secret" }
+      },
+      "whatsapp": {
+        "label": "WhatsApp",
+        "fields": { "token": "Access Token", "phone_number_id": "手机号 ID" }
+      }
+    },
+    "defaultApiKeyLabel": "API Key"
   },
   "provider": {
     "title": "🔑 服务商",
@@ -95,7 +138,9 @@
     "placeholder": "输入消息...",
     "send": "发送",
     "welcome": "你好！我是 nanobot 🐈。有什么可以帮你的？",
-    "noSession": "无活跃会话"
+    "noSession": "无活跃会话",
+    "clear": "清除",
+    "error": "错误：{error}"
   },
   "system": {
     "title": "ℹ️ 系统",
@@ -116,6 +161,14 @@
     "loading": "加载中...",
     "error": "错误",
     "success": "成功",
-    "ok": "确定"
+    "ok": "确定",
+    "saveFailed": "保存失败：",
+    "operationFailed": "操作失败：",
+    "done": "完成",
+    "clear": "清除",
+    "clearLogs": "清除日志",
+    "restart": "重启",
+    "start": "启动",
+    "stop": "停止"
   }
 }

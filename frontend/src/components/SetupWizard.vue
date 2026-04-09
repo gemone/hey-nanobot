@@ -35,7 +35,7 @@
 
         <v-select
           v-model="selectedProvider"
-          :items="providerList"
+          :items="providerItems"
           item-title="label"
           item-value="key"
           :label="t('setup.selectProvider')"
@@ -74,7 +74,7 @@
 
         <v-select
           v-model="selectedChannel"
-          :items="channelList"
+          :items="channelItems"
           item-title="label"
           item-value="key"
           :label="t('setup.selectChannel')"
@@ -88,14 +88,14 @@
 
         <template v-if="selectedChannel">
           <v-text-field
-            v-for="field in channelFields"
-            :key="field.key"
-            v-model="channelData[field.key]"
-            :label="field.label"
+            v-for="f in channelFields"
+            :key="f.key"
+            v-model="channelData[f.key]"
+            :label="f.label"
             variant="outlined"
             density="comfortable"
             class="mb-3"
-            :prepend-inner-icon="field.icon"
+            :prepend-inner-icon="f.icon"
           />
         </template>
 
@@ -137,66 +137,57 @@ async function loadNanobotInfo() {
   } catch {}
 }
 
-// Step 2: Provider
+// Step 2: Provider — labels from i18n
 const showKey = ref(false)
 const selectedProvider = ref('openai')
 const providerApiKey = ref('')
 
-const providerList = [
-  { key: 'openai', label: 'OpenAI', keyLabel: 'OpenAI API Key' },
-  { key: 'anthropic', label: 'Anthropic (Claude)', keyLabel: 'Anthropic API Key' },
-  { key: 'google', label: 'Google (Gemini)', keyLabel: 'Google AI API Key' },
-  { key: 'deepseek', label: 'DeepSeek', keyLabel: 'DeepSeek API Key' },
-  { key: 'openrouter', label: 'OpenRouter', keyLabel: 'OpenRouter API Key' },
-  { key: 'ollama', label: 'Ollama (Local)', keyLabel: 'Ollama Base URL' },
-]
+const providerKeys = ['openai', 'anthropic', 'google', 'deepseek', 'openrouter', 'ollama']
+
+const providerItems = computed(() =>
+  providerKeys.map(key => ({
+    key,
+    label: t(`setup.providers.${key}.label`),
+    keyLabel: t(`setup.providers.${key}.keyLabel`),
+  }))
+)
 
 const currentProviderKeyLabel = computed(() => {
-  const p = providerList.find(p => p.key === selectedProvider.value)
-  return p?.keyLabel || 'API Key'
+  const p = providerItems.value.find(p => p.key === selectedProvider.value)
+  return p?.keyLabel || t('setup.defaultApiKeyLabel')
 })
 
-// Step 3: Channel
+// Step 3: Channel — labels from i18n
 const selectedChannel = ref<string | null>(null)
 const channelData = ref<Record<string, string>>({})
 
-const channelList = [
-  { key: 'telegram', label: 'Telegram', fields: [
-    { key: 'token', label: 'Bot Token', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'discord', label: 'Discord', fields: [
-    { key: 'token', label: 'Bot Token', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'qq', label: 'QQ', fields: [
-    { key: 'app_id', label: 'App ID', icon: 'mdi-identifier' },
-    { key: 'app_secret', label: 'App Secret', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'slack', label: 'Slack', fields: [
-    { key: 'bot_token', label: 'Bot Token (xoxb-...)', icon: 'mdi-key-variant' },
-    { key: 'app_token', label: 'App Token (xapp-...)', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'feishu', label: 'Lark / Feishu', fields: [
-    { key: 'app_id', label: 'App ID', icon: 'mdi-identifier' },
-    { key: 'app_secret', label: 'App Secret', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'dingtalk', label: 'DingTalk', fields: [
-    { key: 'client_id', label: 'Client ID', icon: 'mdi-identifier' },
-    { key: 'client_secret', label: 'Client Secret', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'wecom', label: 'WeCom', fields: [
-    { key: 'corp_id', label: 'Corp ID', icon: 'mdi-identifier' },
-    { key: 'agent_id', label: 'Agent ID', icon: 'mdi-identifier' },
-    { key: 'secret', label: 'Secret', icon: 'mdi-key-variant' },
-  ]},
-  { key: 'whatsapp', label: 'WhatsApp', fields: [
-    { key: 'token', label: 'Access Token', icon: 'mdi-key-variant' },
-    { key: 'phone_number_id', label: 'Phone Number ID', icon: 'mdi-phone' },
-  ]},
-]
+const channelDefs: Record<string, { fields: { key: string; icon: string }[] }> = {
+  telegram:   { fields: [{ key: 'token', icon: 'mdi-key-variant' }] },
+  discord:    { fields: [{ key: 'token', icon: 'mdi-key-variant' }] },
+  qq:         { fields: [{ key: 'app_id', icon: 'mdi-identifier' }, { key: 'app_secret', icon: 'mdi-key-variant' }] },
+  slack:      { fields: [{ key: 'bot_token', icon: 'mdi-key-variant' }, { key: 'app_token', icon: 'mdi-key-variant' }] },
+  feishu:     { fields: [{ key: 'app_id', icon: 'mdi-identifier' }, { key: 'app_secret', icon: 'mdi-key-variant' }] },
+  dingtalk:   { fields: [{ key: 'client_id', icon: 'mdi-identifier' }, { key: 'client_secret', icon: 'mdi-key-variant' }] },
+  wecom:      { fields: [{ key: 'corp_id', icon: 'mdi-identifier' }, { key: 'agent_id', icon: 'mdi-identifier' }, { key: 'secret', icon: 'mdi-key-variant' }] },
+  whatsapp:   { fields: [{ key: 'token', icon: 'mdi-key-variant' }, { key: 'phone_number_id', icon: 'mdi-phone' }] },
+}
+
+const channelKeys = Object.keys(channelDefs)
+
+const channelItems = computed(() =>
+  channelKeys.map(key => ({
+    key,
+    label: t(`setup.channels.${key}.label`),
+  }))
+)
 
 const channelFields = computed(() => {
-  const ch = channelList.find(c => c.key === selectedChannel.value)
-  return ch?.fields || []
+  const def = channelDefs[selectedChannel.value || '']
+  if (!def) return []
+  return def.fields.map(f => ({
+    ...f,
+    label: t(`setup.channels.${selectedChannel.value}.fields.${f.key}`),
+  }))
 })
 
 // Save
