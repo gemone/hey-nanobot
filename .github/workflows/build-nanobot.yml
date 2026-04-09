@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g. v1.2.3)'
+        description: 'Version tag (e.g. v1.2.4)'
         required: false
         default: ''
 
@@ -38,52 +38,74 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
       - name: Install nanobot-ai + PyInstaller
-        run: |
-          pip install pipx
-          pipx install uv
-          uv tool install nanobot-ai
-          # Install PyInstaller into nanobot's env
-          uv pip install --python $(uv tool dir nanobot-ai)/bin/python3 pyinstaller
         shell: bash
+        run: |
+          set -ex
+          python3 -m venv /tmp/nanobot-env
+          source /tmp/nanobot-env/bin/activate 2>/dev/null || source /tmp/nanobot-env/Scripts/activate
+          pip install --upgrade pip
+          pip install nanobot-ai pyinstaller
+          # Verify
+          python3 -c "import nanobot; print('nanobot OK')"
+          python3 -m PyInstaller --version
 
-      - name: Build nanobot binary (Unix)
+      - name: Build nanobot binary
+        shell: bash
+        run: |
+          source /tmp/nanobot-env/bin/activate 2>/dev/null || source /tmp/nanobot-env/Scripts/activate
+
+          # Find site-packages for the venv
+          SITE_PKGS=$(python3 -c "import site; print(site.getsitepackages()[0])")
+          echo "Site-packages: $SITE_PKGS"
+
+          # Run build_nano.py with env vars pointing to the venv
+          NANOBOT_ROOT="/tmp/nanobot-env" \
+          NANOBOT_SITE_PACKAGES="$SITE_PKGS" \
+          NANOBOT_PYTHON="$(which python3)" \
+          python3 build_nano.py
+
+      - name: Verify binary (Unix)
         if: matrix.platform != 'windows'
-        run: |
-          PYTHON="$(uv tool dir nanobot-ai)/bin/python3"
-          "$PYTHON" build_nano.py
         shell: bash
-
-      - name: Build nanobot binary (Windows)
-        if: matrix.platform == 'windows'
         run: |
-          $python = "$(uv tool dir nanobot-ai)\bin\python3.exe"
-          if (-not (Test-Path $python)) { $python = "$(uv tool dir nanobot-ai)\Scripts\python.exe" }
-          & $python build_nano.py
+          ls -lh nanobot-bin/
+          ./nanobot-bin/nanobot --version
+
+      - name: Verify binary (Windows)
+        if: matrix.platform == 'windows'
         shell: pwsh
+        run: |
+          ls nanobot-bin/
+          .\nanobot-bin\nanobot.exe --version
 
       - name: Package (Unix)
         if: matrix.platform != 'windows'
+        shell: bash
         run: |
           mkdir -p dist/nanobot-bin
           cp nanobot-bin/nanobot dist/nanobot-bin/
           chmod +x dist/nanobot-bin/nanobot
           cd dist
           tar czf nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz nanobot-bin/
+          echo "Packaged:"
+          ls -lh nanobot-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
 
       - name: Package (Windows)
         if: matrix.platform == 'windows'
+        shell: pwsh
         run: |
           mkdir dist\nanobot-bin
           copy nanobot-bin\nanobot.exe dist\nanobot-bin\
           cd dist
           Compress-Archive -Path nanobot-bin -DestinationPath nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
-        shell: pwsh
+          echo "Packaged:"
+          ls nanobot-${{ matrix.platform }}-${{ matrix.arch }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -31,9 +31,28 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 # The uv tool install root — adjust if your setup differs.
-UV_TOOL_ROOT = Path.home() / ".local/share/uv/tools/nanobot-ai"
-SITE_PACKAGES = UV_TOOL_ROOT / "lib/python3.13/site-packages"
+# Override with env var NANOBOT_ROOT to support CI environments.
+_env_root = os.environ.get("NANOBOT_ROOT")
+if _env_root:
+    UV_TOOL_ROOT = Path(_env_root)
+else:
+    UV_TOOL_ROOT = Path.home() / ".local/share/uv/tools/nanobot-ai"
+
+# Override site-packages with env var (for venv-based CI installs)
+_env_site = os.environ.get("NANOBOT_SITE_PACKAGES")
+if _env_site:
+    SITE_PACKAGES = Path(_env_site)
+else:
+    SITE_PACKAGES = UV_TOOL_ROOT / "lib/python3.13/site-packages"
+
 NANOBOT_PKG = SITE_PACKAGES / "nanobot"
+
+# Python interpreter — override with NANOBOT_PYTHON for CI
+_env_python = os.environ.get("NANOBOT_PYTHON")
+if _env_python:
+    UV_PYTHON = Path(_env_python)
+else:
+    UV_PYTHON = UV_TOOL_ROOT / "bin" / "python3"
 
 # Output directory (relative to this script's location)
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -413,11 +432,13 @@ def main() -> int:
         error("Make sure nanobot-ai is installed via uv: uv tool install nanobot-ai")
         return 1
 
-    # Find PyInstaller — prefer the one in the uv env, fall back to system
-    uv_python = UV_TOOL_ROOT / "bin" / "python3"
+    # Find PyInstaller — prefer the configured python, fall back to system
+    uv_python = UV_PYTHON
+    if not uv_python.exists():
+        uv_python = UV_TOOL_ROOT / "bin" / "python3"
     if not uv_python.exists():
         uv_python = UV_TOOL_ROOT / "bin" / "python"
-    if SYSTEM == "Windows":
+    if SYSTEM == "Windows" and not uv_python.exists():
         uv_python = UV_TOOL_ROOT / "Scripts" / "python.exe"
 
     # Check if pyinstaller is available
@@ -431,7 +452,7 @@ def main() -> int:
             break
 
     if not pyinstaller_cmd:
-        # Try via the uv python
+        # Try via the python
         if uv_python.exists():
             check = subprocess.run(
                 [str(uv_python), "-m", "PyInstaller", "--version"],
