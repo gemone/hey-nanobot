@@ -28,7 +28,9 @@
     "deleteTitle": "Delete Bot",
     "deleteConfirm": "Are you sure you want to delete {name}?",
     "deleteWarning": "This will remove the bot's config and workspace. This cannot be undone.",
-    "delete": "Delete"
+    "delete": "Delete",
+    "editTitle": "Edit Bot",
+    "save": "Save"
   },
   "setup": {
     "welcome": "Welcome to Hey Nanobot",
@@ -52,56 +54,117 @@
     "finish": "Finish Setup",
     "saveFailed": "Configuration save failed: ",
     "providers": {
-      "openai": { "label": "OpenAI", "keyLabel": "OpenAI API Key" },
-      "anthropic": { "label": "Anthropic (Claude)", "keyLabel": "Anthropic API Key" },
-      "google": { "label": "Google (Gemini)", "keyLabel": "Google AI API Key" },
-      "deepseek": { "label": "DeepSeek", "keyLabel": "DeepSeek API Key" },
-      "openrouter": { "label": "OpenRouter", "keyLabel": "OpenRouter API Key" },
-      "ollama": { "label": "Ollama (Local)", "keyLabel": "Ollama Base URL" }
+      "openai": {
+        "label": "OpenAI",
+        "keyLabel": "OpenAI API Key"
+      },
+      "anthropic": {
+        "label": "Anthropic (Claude)",
+        "keyLabel": "Anthropic API Key"
+      },
+      "google": {
+        "label": "Google (Gemini)",
+        "keyLabel": "Google AI API Key"
+      },
+      "deepseek": {
+        "label": "DeepSeek",
+        "keyLabel": "DeepSeek API Key"
+      },
+      "openrouter": {
+        "label": "OpenRouter",
+        "keyLabel": "OpenRouter API Key"
+      },
+      "ollama": {
+        "label": "Ollama (Local)",
+        "keyLabel": "Ollama Base URL"
+      }
     },
     "channels": {
       "telegram": {
         "label": "Telegram",
-        "fields": { "token": "Bot Token" }
+        "fields": {
+          "token": "Bot Token"
+        }
       },
       "discord": {
         "label": "Discord",
-        "fields": { "token": "Bot Token" }
+        "fields": {
+          "token": "Bot Token"
+        }
       },
       "qq": {
         "label": "QQ",
-        "fields": { "app_id": "App ID", "app_secret": "App Secret" }
+        "fields": {
+          "app_id": "App ID",
+          "app_secret": "App Secret"
+        }
       },
       "slack": {
         "label": "Slack",
-        "fields": { "bot_token": "Bot Token (xoxb-...)", "app_token": "App Token (xapp-...)" }
+        "fields": {
+          "bot_token": "Bot Token (xoxb-...)",
+          "app_token": "App Token (xapp-...)"
+        }
       },
       "feishu": {
         "label": "Lark / Feishu",
-        "fields": { "app_id": "App ID", "app_secret": "App Secret" }
+        "fields": {
+          "app_id": "App ID",
+          "app_secret": "App Secret"
+        }
       },
       "dingtalk": {
         "label": "DingTalk",
-        "fields": { "client_id": "Client ID", "client_secret": "Client Secret" }
+        "fields": {
+          "client_id": "Client ID",
+          "client_secret": "Client Secret"
+        }
       },
       "wecom": {
         "label": "WeCom",
-        "fields": { "corp_id": "Corp ID", "agent_id": "Agent ID", "secret": "Secret" }
+        "fields": {
+          "corp_id": "Corp ID",
+          "agent_id": "Agent ID",
+          "secret": "Secret"
+        }
       },
       "whatsapp": {
         "label": "WhatsApp",
-        "fields": { "token": "Access Token", "phone_number_id": "Phone Number ID" }
+        "fields": {
+          "token": "Access Token",
+          "phone_number_id": "Phone Number ID"
+        }
       }
     },
     "defaultApiKeyLabel": "API Key"
   },
   "provider": {
     "title": "🔑 Providers",
-    "apiKey": "API Key"
+    "apiKey": "API Key",
+    "agentDefaults": "Agent Defaults",
+    "defaultProvider": "Default Provider",
+    "defaultModel": "Default Model",
+    "autoDetect": "Auto Detect",
+    "apiBase": "API Base URL"
   },
   "channel": {
     "title": "🔗 Channels",
-    "enabled": "Enabled"
+    "enabled": "Enabled",
+    "streaming": "Streaming",
+    "disabled": "Enable this channel to configure",
+    "fields": {
+      "token": "Token",
+      "appId": "App ID",
+      "appSecret": "App Secret",
+      "botToken": "Bot Token",
+      "appToken": "App Token",
+      "clientId": "Client ID",
+      "clientSecret": "Client Secret",
+      "corpId": "Corp ID",
+      "agentId": "Agent ID",
+      "secret": "Secret",
+      "phoneNumberId": "Phone Number ID"
+    }
   },
   "config": {
     "title": "⚙️ Config",
@@ -131,7 +194,11 @@
   "sessions": {
     "title": "📂 Sessions",
     "noSessions": "No sessions found.",
-    "showInFinder": "Show in Finder"
+    "showInFinder": "Show in Finder",
+    "search": "Search sessions...",
+    "noResults": "No matching sessions",
+    "deleteTitle": "Delete Session",
+    "deleteConfirm": "Delete session \"{name}\"?"
   },
   "chat": {
     "title": "💬 Chat",

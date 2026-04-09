@@ -28,7 +28,9 @@
     "deleteTitle": "删除 Bot",
     "deleteConfirm": "确定要删除 {name} 吗？",
     "deleteWarning": "这将删除该 Bot 的配置和工作空间，无法恢复。",
-    "delete": "删除"
+    "delete": "删除",
+    "editTitle": "编辑 Bot",
+    "save": "保存"
   },
   "setup": {
     "welcome": "欢迎使用 Hey Nanobot",
@@ -52,56 +54,117 @@
     "finish": "完成配置",
     "saveFailed": "配置保存失败：",
     "providers": {
-      "openai": { "label": "OpenAI", "keyLabel": "OpenAI API Key" },
-      "anthropic": { "label": "Anthropic (Claude)", "keyLabel": "Anthropic API Key" },
-      "google": { "label": "Google (Gemini)", "keyLabel": "Google AI API Key" },
-      "deepseek": { "label": "DeepSeek", "keyLabel": "DeepSeek API Key" },
-      "openrouter": { "label": "OpenRouter", "keyLabel": "OpenRouter API Key" },
-      "ollama": { "label": "Ollama (本地)", "keyLabel": "Ollama Base URL" }
+      "openai": {
+        "label": "OpenAI",
+        "keyLabel": "OpenAI API Key"
+      },
+      "anthropic": {
+        "label": "Anthropic (Claude)",
+        "keyLabel": "Anthropic API Key"
+      },
+      "google": {
+        "label": "Google (Gemini)",
+        "keyLabel": "Google AI API Key"
+      },
+      "deepseek": {
+        "label": "DeepSeek",
+        "keyLabel": "DeepSeek API Key"
+      },
+      "openrouter": {
+        "label": "OpenRouter",
+        "keyLabel": "OpenRouter API Key"
+      },
+      "ollama": {
+        "label": "Ollama (本地)",
+        "keyLabel": "Ollama Base URL"
+      }
     },
     "channels": {
       "telegram": {
         "label": "Telegram",
-        "fields": { "token": "Bot Token" }
+        "fields": {
+          "token": "Bot Token"
+        }
       },
       "discord": {
         "label": "Discord",
-        "fields": { "token": "Bot Token" }
+        "fields": {
+          "token": "Bot Token"
+        }
       },
       "qq": {
         "label": "QQ",
-        "fields": { "app_id": "App ID", "app_secret": "App Secret" }
+        "fields": {
+          "app_id": "App ID",
+          "app_secret": "App Secret"
+        }
       },
       "slack": {
         "label": "Slack",
-        "fields": { "bot_token": "Bot Token (xoxb-...)", "app_token": "App Token (xapp-...)" }
+        "fields": {
+          "bot_token": "Bot Token (xoxb-...)",
+          "app_token": "App Token (xapp-...)"
+        }
       },
       "feishu": {
         "label": "飞书",
-        "fields": { "app_id": "App ID", "app_secret": "App Secret" }
+        "fields": {
+          "app_id": "App ID",
+          "app_secret": "App Secret"
+        }
       },
       "dingtalk": {
         "label": "钉钉",
-        "fields": { "client_id": "Client ID", "client_secret": "Client Secret" }
+        "fields": {
+          "client_id": "Client ID",
+          "client_secret": "Client Secret"
+        }
       },
       "wecom": {
         "label": "企业微信",
-        "fields": { "corp_id": "企业 ID", "agent_id": "应用 ID", "secret": "Secret" }
+        "fields": {
+          "corp_id": "企业 ID",
+          "agent_id": "应用 ID",
+          "secret": "Secret"
+        }
       },
       "whatsapp": {
         "label": "WhatsApp",
-        "fields": { "token": "Access Token", "phone_number_id": "手机号 ID" }
+        "fields": {
+          "token": "Access Token",
+          "phone_number_id": "手机号 ID"
+        }
       }
     },
     "defaultApiKeyLabel": "API Key"
   },
   "provider": {
     "title": "🔑 服务商",
-    "apiKey": "API 密钥"
+    "apiKey": "API 密钥",
+    "agentDefaults": "Agent 默认配置",
+    "defaultProvider": "默认服务商",
+    "defaultModel": "默认模型",
+    "autoDetect": "自动检测",
+    "apiBase": "API 地址"
   },
   "channel": {
     "title": "🔗 消息渠道",
-    "enabled": "已启用"
+    "enabled": "已启用",
+    "streaming": "流式输出",
+    "disabled": "启用后可配置",
+    "fields": {
+      "token": "Token",
+      "appId": "App ID",
+      "appSecret": "App Secret",
+      "botToken": "Bot Token",
+      "appToken": "App Token",
+      "clientId": "Client ID",
+      "clientSecret": "Client Secret",
+      "corpId": "企业 ID",
+      "agentId": "应用 ID",
+      "secret": "Secret",
+      "phoneNumberId": "手机号 ID"
+    }
   },
   "config": {
     "title": "⚙️ 配置",
@@ -131,7 +194,11 @@
   "sessions": {
     "title": "📂 会话",
     "noSessions": "未找到会话。",
-    "showInFinder": "在 Finder 中显示"
+    "showInFinder": "在 Finder 中显示",
+    "search": "搜索会话...",
+    "noResults": "没有匹配的会话",
+    "deleteTitle": "删除会话",
+    "deleteConfirm": "确定删除会话 \"{name}\"？"
   },
   "chat": {
     "title": "💬 对话",

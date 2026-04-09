@@ -400,7 +400,7 @@ func (a *App) SaveConfig(configJSON string) error {
 
 // ==================== Provider Management ====================
 
-func (a *App) SetProviderAPIKey(provider string, apiKey string) error {
+func (a *App) SetProviderField(provider string, field string, value string) error {
 	configPath := a.activeConfigPath()
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -419,7 +419,11 @@ func (a *App) SetProviderAPIKey(provider string, apiKey string) error {
 	if !ok {
 		p = make(map[string]interface{})
 	}
-	p["apiKey"] = apiKey
+	var parsed interface{}
+	if err := json.Unmarshal([]byte(value), &parsed); err != nil {
+		parsed = value
+	}
+	p[field] = parsed
 	providers[provider] = p
 	newData, _ := json.MarshalIndent(raw, "", "  ")
 	if err := os.WriteFile(configPath, newData, 0600); err != nil {
@@ -427,6 +431,10 @@ func (a *App) SetProviderAPIKey(provider string, apiKey string) error {
 	}
 	wailsRuntime.EventsEmit(a.ctx, "config:saved", true)
 	return nil
+}
+
+func (a *App) SetProviderAPIKey(provider string, apiKey string) error {
+	return a.SetProviderField(provider, "apiKey", apiKey)
 }
 
 func (a *App) GetProviders() map[string]interface{} {
@@ -441,6 +449,55 @@ func (a *App) GetProviders() map[string]interface{} {
 		return providers
 	}
 	return map[string]interface{}{}
+}
+
+// ==================== Agent Defaults ====================
+
+func (a *App) GetAgentDefaults() map[string]interface{} {
+	configPath := a.activeConfigPath()
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return map[string]interface{}{}
+	}
+	var raw map[string]interface{}
+	json.Unmarshal(data, &raw)
+	agents, ok := raw["agents"].(map[string]interface{})
+	if !ok {
+		return map[string]interface{}{}
+	}
+	defaults, ok := agents["defaults"].(map[string]interface{})
+	if !ok {
+		return map[string]interface{}{}
+	}
+	return defaults
+}
+
+func (a *App) SetAgentDefaults(defaultsJSON string) error {
+	configPath := a.activeConfigPath()
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return err
+	}
+	var raw map[string]interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	agents, ok := raw["agents"].(map[string]interface{})
+	if !ok {
+		agents = make(map[string]interface{})
+		raw["agents"] = agents
+	}
+	var defaults map[string]interface{}
+	if err := json.Unmarshal([]byte(defaultsJSON), &defaults); err != nil {
+		return err
+	}
+	agents["defaults"] = defaults
+	newData, _ := json.MarshalIndent(raw, "", "  ")
+	if err := os.WriteFile(configPath, newData, 0600); err != nil {
+		return err
+	}
+	wailsRuntime.EventsEmit(a.ctx, "config:saved", true)
+	return nil
 }
 
 // ==================== Channel Management ====================
@@ -951,6 +1008,26 @@ func (a *App) scanSessions() {
 	})
 
 	wailsRuntime.EventsEmit(a.ctx, "sessions:updated", a.sessions)
+}
+
+func (a *App) DeleteSession(sessionPath string) error {
+	if sessionPath == "" {
+		return fmt.Errorf("session path is empty")
+	}
+	// Validate path is under workspace/sessions
+	ws := a.activeWorkspace()
+	absPath, err := filepath.Abs(sessionPath)
+	if err != nil {
+		return fmt.Errorf("invalid path: %w", err)
+	}
+	if !strings.HasPrefix(absPath, filepath.Join(ws, "sessions")) {
+		return fmt.Errorf("path is outside sessions directory")
+	}
+	if err := os.Remove(absPath); err != nil {
+		return fmt.Errorf("failed to delete: %w", err)
+	}
+	a.scanSessions()
+	return nil
 }
 
 // ==================== System Info ====================

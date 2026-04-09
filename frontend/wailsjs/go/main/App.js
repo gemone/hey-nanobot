@@ -26,8 +26,16 @@ export function DeleteBot(arg1) {
   return window['go']['main']['App']['DeleteBot'](arg1);
 }
 
+export function DeleteSession(arg1) {
+  return window['go']['main']['App']['DeleteSession'](arg1);
+}
+
 export function GetActiveBot() {
   return window['go']['main']['App']['GetActiveBot']();
+}
+
+export function GetAgentDefaults() {
+  return window['go']['main']['App']['GetAgentDefaults']();
 }
 
 export function GetBotConfig(arg1) {
@@ -118,6 +126,10 @@ export function SendMessage(arg1) {
   return window['go']['main']['App']['SendMessage'](arg1);
 }
 
+export function SetAgentDefaults(arg1) {
+  return window['go']['main']['App']['SetAgentDefaults'](arg1);
+}
+
 export function SetChannelField(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetChannelField'](arg1, arg2, arg3);
 }
@@ -128,6 +140,10 @@ export function SetNanobotPath(arg1) {
 
 export function SetProviderAPIKey(arg1, arg2) {
   return window['go']['main']['App']['SetProviderAPIKey'](arg1, arg2);
+}
+
+export function SetProviderField(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetProviderField'](arg1, arg2, arg3);
 }
 
 export function SetupSaveConfig(arg1, arg2) {

@@ -14,7 +14,11 @@ export function CreateBot(arg1:string,arg2:string):Promise<Record<string, any>>;
 
 export function DeleteBot(arg1:string):Promise<void>;
 
+export function DeleteSession(arg1:string):Promise<void>;
+
 export function GetActiveBot():Promise<Record<string, any>>;
+
+export function GetAgentDefaults():Promise<Record<string, any>>;
 
 export function GetBotConfig(arg1:string):Promise<string>;
 
@@ -60,11 +64,15 @@ export function SaveConfig(arg1:string):Promise<void>;
 
 export function SendMessage(arg1:string):Promise<void>;
 
+export function SetAgentDefaults(arg1:string):Promise<void>;
+
 export function SetChannelField(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function SetNanobotPath(arg1:string):Promise<void>;
 
 export function SetProviderAPIKey(arg1:string,arg2:string):Promise<void>;
+
+export function SetProviderField(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function SetupSaveConfig(arg1:string,arg2:string):Promise<void>;
 

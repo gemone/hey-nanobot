@@ -78,14 +78,9 @@
         <BotsPage v-if="currentPage === 'bots'" />
         <ChatPage v-else-if="currentPage === 'chat'" />
         <FeedPage v-else-if="currentPage === 'feed'" :gateway-running="gatewayRunning" />
-        <ChannelsPage
-          v-else-if="currentPage === 'channels'"
-          :channels="channels"
-          @toggle-channel="toggleChannel"
-          @update-field="updateChannelField"
-        />
-        <SessionsPage v-else-if="currentPage === 'sessions'" :sessions="sessions" @open-in-finder="openInFinder" />
-        <ProvidersPage v-else-if="currentPage === 'providers'" :providers="providers" @set-key="setProviderKey" />
+        <ChannelsPage v-else-if="currentPage === 'channels'" />
+        <SessionsPage v-else-if="currentPage === 'sessions'" />
+        <ProvidersPage v-else-if="currentPage === 'providers'" />
         <ConfigPage v-else-if="currentPage === 'config'" :config-json="configJson" @save="saveConfig" />
         <GatewayPage v-else-if="currentPage === 'gateway'" :status="gatewayStatus" :logs="gatewayLogs" @start="startGateway" @stop="stopGateway" @restart="restartGateway" @clear-logs="clearLogs" />
         <SystemPage v-else-if="currentPage === 'system'" :info="systemInfo" :nanobot-info="nanobotInfo" />
@@ -98,11 +93,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
-  GetConfig, SaveConfig, GetChannels, SetChannelField,
-  GetProviders, SetProviderAPIKey, GetGatewayStatus,
+  GetConfig, SaveConfig,
+  GetGatewayStatus,
   StartGateway, StopGateway, RestartGateway,
-  GetSessions, GetSystemInfo,
-  OpenInFinder,
+  GetSystemInfo,
   GetGatewayLogs, ClearGatewayLogs,
   GetActiveBot, ListBots, GetSetupState, GetNanobotInfo,
 } from '../wailsjs/go/main/App'
@@ -165,24 +159,6 @@ async function saveConfig(json: string) {
   catch (e) { alert(t('common.saveFailed') + e) }
 }
 
-// ====== Channels ======
-const channels = ref<Record<string, any>>({})
-async function loadChannels() { try { channels.value = await GetChannels() } catch {} }
-async function toggleChannel(name: string, enabled: boolean) {
-  try { await SetChannelField(name, 'enabled', JSON.stringify(enabled)); await loadChannels() } catch {}
-}
-async function updateChannelField(channel: string, field: string, value: string) {
-  try { await SetChannelField(channel, field, value); await loadChannels() } catch {}
-}
-
-// ====== Providers ======
-const providers = ref<Record<string, any>>({})
-async function loadProviders() { try { providers.value = await GetProviders() } catch {} }
-async function setProviderKey(provider: string, key: string) {
-  try { await SetProviderAPIKey(provider, key); await loadProviders() }
-  catch (e) { alert(t('common.operationFailed') + e) }
-}
-
 // ====== Gateway ======
 const gatewayStatus = ref<any>({ running: false })
 const gatewayRunning = computed(() => gatewayStatus.value?.running || false)
@@ -207,14 +183,10 @@ async function loadNanobotInfo() {
   } catch {}
 }
 
-function openInFinder(path: string) { OpenInFinder(path) }
-
 function onSetupDone() {
   showSetup.value = false
   loadActiveBot()
   loadConfig()
-  loadChannels()
-  loadProviders()
   loadGatewayStatus()
 }
 
@@ -229,7 +201,7 @@ onMounted(async () => {
     }
   } catch {}
 
-  await Promise.all([loadActiveBot(), loadConfig(), loadChannels(), loadProviders(), loadGatewayStatus(), loadNanobotInfo()])
+  await Promise.all([loadActiveBot(), loadConfig(), loadGatewayStatus(), loadNanobotInfo()])
   try { systemInfo.value = await GetSystemInfo() } catch {}
 
   // Event listeners
@@ -237,15 +209,13 @@ onMounted(async () => {
   EventsOn('gateway:status', (status: any) => { gatewayStatus.value = status })
   EventsOn('gateway:stdout', () => { refreshLogs() })
   EventsOn('gateway:stderr', () => { refreshLogs() })
-  EventsOn('config:saved', () => { loadConfig(); loadChannels(); loadProviders() })
+  EventsOn('config:saved', () => { loadConfig() })
   EventsOn('sessions:updated', (s: any[]) => { sessions.value = s })
   EventsOn('channel:message', () => { channelMsgCount.value++ })
   EventsOn('channel:messages:cleared', () => { channelMsgCount.value = 0 })
   EventsOn('bot:switched', () => {
     loadActiveBot()
     loadConfig()
-    loadChannels()
-    loadProviders()
     loadGatewayStatus()
   })
   EventsOn('bots:updated', () => { loadActiveBot() })
