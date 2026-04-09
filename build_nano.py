@@ -569,7 +569,8 @@ def main() -> int:
     test_result = subprocess.run(test_cmd, capture_output=True, text=True, timeout=15)
 
     if test_result.returncode == 0:
-        info(f"Output: {test_result.stdout.strip()}")
+        output = (test_result.stdout or "").strip() or (test_result.stderr or "").strip()
+        info(f"Output: {output}")
         info("✓ Binary works!")
     else:
         warn(f"Exit code: {test_result.returncode}")
