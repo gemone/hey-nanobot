@@ -5,6 +5,11 @@ frontend/node_modules/
 # Build output
 build/bin/
 
+# PyInstaller build artifacts
+build_nanobot/
+nanobot-bin/
+dist/
+
 # IDE
 .vscode/
 .idea/

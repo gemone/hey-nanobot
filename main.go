@@ -51,7 +51,7 @@ func main() {
 			},
 			About: &mac.AboutInfo{
 				Title:   "Hey Nanobot",
-				Message: fmt.Sprintf("Personal AI Assistant 🐈\n\nPowered by nanobot-ai\nv%s", version),
+				Message: fmt.Sprintf("Personal AI Assistant 🐈\n\nMulti-Bot Desktop Client\nv%s", version),
 			},
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,

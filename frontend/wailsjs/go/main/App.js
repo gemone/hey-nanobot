@@ -14,6 +14,22 @@ export function ClearMessages() {
   return window['go']['main']['App']['ClearMessages']();
 }
 
+export function CreateBot(arg1, arg2) {
+  return window['go']['main']['App']['CreateBot'](arg1, arg2);
+}
+
+export function DeleteBot(arg1) {
+  return window['go']['main']['App']['DeleteBot'](arg1);
+}
+
+export function GetActiveBot() {
+  return window['go']['main']['App']['GetActiveBot']();
+}
+
+export function GetBotConfig(arg1) {
+  return window['go']['main']['App']['GetBotConfig'](arg1);
+}
+
 export function GetChannelMessages() {
   return window['go']['main']['App']['GetChannelMessages']();
 }
@@ -56,6 +72,10 @@ export function HideWindow() {
 
 export function IsHidden() {
   return window['go']['main']['App']['IsHidden']();
+}
+
+export function ListBots() {
+  return window['go']['main']['App']['ListBots']();
 }
 
 export function NavigateTo(arg1) {
@@ -110,6 +130,14 @@ export function StopGateway() {
   return window['go']['main']['App']['StopGateway']();
 }
 
+export function SwitchBot(arg1) {
+  return window['go']['main']['App']['SwitchBot'](arg1);
+}
+
 export function ToggleFullscreen() {
   return window['go']['main']['App']['ToggleFullscreen']();
+}
+
+export function UpdateBot(arg1, arg2, arg3) {
+  return window['go']['main']['App']['UpdateBot'](arg1, arg2, arg3);
 }

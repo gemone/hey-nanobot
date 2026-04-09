@@ -12,7 +12,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 APP_NAME="hey-nanobot"
-VERSION="1.1.0"
+VERSION="0.1.0"
 BUILD_DIR="build/bin"
 LDFLAGS="-s -w -X main.version=${VERSION}"
 

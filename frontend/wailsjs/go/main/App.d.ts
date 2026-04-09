@@ -8,6 +8,14 @@ export function ClearGatewayLogs():Promise<void>;
 
 export function ClearMessages():Promise<void>;
 
+export function CreateBot(arg1:string,arg2:string):Promise<Record<string, any>>;
+
+export function DeleteBot(arg1:string):Promise<void>;
+
+export function GetActiveBot():Promise<Record<string, any>>;
+
+export function GetBotConfig(arg1:string):Promise<string>;
+
 export function GetChannelMessages():Promise<Array<main.ChannelMessage>>;
 
 export function GetChannels():Promise<Record<string, any>>;
@@ -29,6 +37,8 @@ export function GetSystemInfo():Promise<Record<string, string>>;
 export function HideWindow():Promise<void>;
 
 export function IsHidden():Promise<boolean>;
+
+export function ListBots():Promise<Array<Record<string, any>>>;
 
 export function NavigateTo(arg1:string):Promise<void>;
 
@@ -56,4 +66,8 @@ export function StartGateway():Promise<void>;
 
 export function StopGateway():Promise<void>;
 
+export function SwitchBot(arg1:string):Promise<void>;
+
 export function ToggleFullscreen():Promise<void>;
+
+export function UpdateBot(arg1:string,arg2:string,arg3:string):Promise<void>;

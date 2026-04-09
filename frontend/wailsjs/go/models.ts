@@ -72,6 +72,7 @@ export namespace main {
 	    // Go type: time
 	    startedAt: any;
 	    configPath: string;
+	    botId: string;
 	    uptime: string;
 	
 	    static createFrom(source: any = {}) {
@@ -85,6 +86,7 @@ export namespace main {
 	        this.port = source["port"];
 	        this.startedAt = this.convertValues(source["startedAt"], null);
 	        this.configPath = source["configPath"];
+	        this.botId = source["botId"];
 	        this.uptime = source["uptime"];
 	    }
 	
