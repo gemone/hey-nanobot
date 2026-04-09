@@ -123,7 +123,7 @@ import { toggleLocale, getLocale } from './i18n'
 const { t } = useI18n()
 const currentLocale = ref(getLocale())
 
-const appVersion = '1.2.1'
+const appVersion = '1.2.6'
 const drawer = ref(true)
 const currentPage = ref('chat')
 const channelMsgCount = ref(0)

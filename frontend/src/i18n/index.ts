@@ -20,9 +20,11 @@ function getSavedLocale(): string {
   return detectLocale()
 }
 
+const detectedLocale = getSavedLocale()
+
 const i18n = createI18n({
   legacy: false,
-  locale: getSavedLocale(),
+  locale: detectedLocale,
   fallbackLocale: 'en',
   messages: { en, zh },
 })
