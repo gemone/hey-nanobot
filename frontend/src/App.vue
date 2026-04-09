@@ -8,45 +8,44 @@
       <!-- Sidebar / Navigation Drawer -->
       <v-navigation-drawer
         v-model="drawer"
-        :width="220"
+        :width="210"
         permanent
-        :color="'#161625'"
+        :color="'#12121f'"
         :border="true"
         class="app-sidebar"
-        style="padding-top: 38px; -webkit-app-region: drag;"
+        style="padding-top: 40px; -webkit-app-region: drag;"
       >
-        <!-- Brand + Language Toggle -->
-        <div class="d-flex align-center ga-2 pa-4 pb-3">
-          <span style="font-size: 22px;">🐈</span>
-          <span class="text-body-1 font-weight-bold">{{ t('app.title') }}</span>
+        <!-- Brand -->
+        <div class="d-flex align-center ga-2 px-4 pb-2 pt-1">
+          <span style="font-size: 20px;">🐈</span>
+          <span class="text-subtitle-2 font-weight-bold" style="letter-spacing: -0.3px;">Hey Nanobot</span>
           <v-spacer />
-          <v-btn icon size="x-small" variant="text" @click="onToggleLocale" class="locale-btn">
-            <span class="text-caption">{{ currentLocale === 'zh' ? 'EN' : '中' }}</span>
+          <v-btn icon size="x-small" variant="text" @click="onToggleLocale" class="locale-btn" :title="currentLocale === 'zh' ? 'Switch to English' : '切换到中文'">
+            <span class="text-caption font-weight-medium">{{ currentLocale === 'zh' ? 'EN' : '中' }}</span>
           </v-btn>
-          <span class="text-caption text-medium-emphasis">v{{ appVersion }}</span>
         </div>
 
         <!-- Bot Switcher -->
         <div
-          class="mx-2 mb-3 pa-2 d-flex align-center ga-2 rounded-lg cursor-pointer bot-switcher"
-          style="background: #1e1e35; border: 1px solid #2a2a45; -webkit-app-region: no-drag;"
+          class="mx-3 my-2 pa-2 d-flex align-center ga-2 rounded-lg bot-switcher"
+          style="background: #181830; border: 1px solid #252540; -webkit-app-region: no-drag;"
           @click="currentPage = 'bots'"
         >
-          <v-avatar size="36" :color="'#1a1a30'" rounded="lg">
-            <span style="font-size: 18px;">{{ activeBot.avatar || '🐱' }}</span>
+          <v-avatar size="32" color="#1a1a30" rounded="lg">
+            <span style="font-size: 16px;">{{ activeBot.avatar || '🐱' }}</span>
           </v-avatar>
           <div class="flex-grow-1" style="min-width: 0;">
-            <div class="text-body-2 font-weight-semibold text-truncate">{{ activeBot.name || t('common.loading') }}</div>
-            <div class="d-flex align-center ga-1 text-caption text-medium-emphasis">
+            <div class="text-caption font-weight-semibold text-truncate">{{ activeBot.name || t('common.loading') }}</div>
+            <div class="d-flex align-center ga-1" style="font-size: 10px; color: #5a5a78;">
               <span class="status-dot" :class="{ running: gatewayRunning }"></span>
               {{ gatewayRunning ? t('common.online') : t('common.offline') }}
             </div>
           </div>
-          <v-icon size="16" color="grey">mdi-chevron-right</v-icon>
+          <v-icon size="14" color="#5a5a78">mdi-chevron-right</v-icon>
         </div>
 
         <!-- Nav Items -->
-        <v-list density="compact" nav class="px-2" style="-webkit-app-region: no-drag;">
+        <v-list density="compact" nav class="px-2 py-0" style="-webkit-app-region: no-drag;">
           <v-list-item
             v-for="item in navItems"
             :key="item.id"
@@ -57,24 +56,24 @@
             rounded="lg"
             active-color="primary"
             :slim="true"
-            class="mb-1"
+            class="nav-item-custom mb-0"
           >
             <template v-slot:append v-if="item.badge">
-              <v-chip size="x-small" :color="'error'" text-color="white" class="px-1">{{ item.badge }}</v-chip>
+              <span class="nav-badge">{{ item.badge }}</span>
             </template>
           </v-list-item>
         </v-list>
 
         <template v-slot:append>
-          <v-divider />
-          <div class="pa-3 text-center text-caption text-medium-emphasis">
-            Hey Nanobot v{{ appVersion }} · {{ t('app.multiBot') }}
+          <v-divider color="#252540" />
+          <div class="pa-3 text-center" style="font-size: 10px; color: #3a3a58;">
+            v{{ appVersion }}
           </div>
         </template>
       </v-navigation-drawer>
 
       <!-- Main Content -->
-      <v-main style="padding-top: 38px !important;">
+      <v-main style="padding-top: 40px !important;">
         <BotsPage v-if="currentPage === 'bots'" />
         <ChatPage v-else-if="currentPage === 'chat'" />
         <FeedPage v-else-if="currentPage === 'feed'" :gateway-running="gatewayRunning" />
@@ -86,11 +85,26 @@
         <SystemPage v-else-if="currentPage === 'system'" :info="systemInfo" :nanobot-info="nanobotInfo" />
       </v-main>
     </template>
+
+    <!-- Global Snackbar -->
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+      location="top right"
+      rounded="lg"
+      density="compact"
+    >
+      <div class="d-flex align-center ga-2">
+        <v-icon size="16">{{ snackbar.icon }}</v-icon>
+        <span style="font-size: 13px;">{{ snackbar.text }}</span>
+      </div>
+    </v-snackbar>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   GetConfig, SaveConfig,
@@ -117,11 +131,22 @@ import { toggleLocale, getLocale } from './i18n'
 const { t } = useI18n()
 const currentLocale = ref(getLocale())
 
-const appVersion = '1.2.6'
+const appVersion = '1.3.0'
 const drawer = ref(true)
 const currentPage = ref('chat')
 const channelMsgCount = ref(0)
 const showSetup = ref(false)
+
+// ====== Global Snackbar ======
+const snackbar = reactive({ show: false, text: '', color: 'success', icon: 'mdi-check-circle', timeout: 2500 })
+
+function notify(text: string, color = 'success', icon = 'mdi-check-circle') {
+  snackbar.text = text
+  snackbar.color = color
+  snackbar.icon = icon
+  snackbar.show = true
+}
+window.__notify = notify
 
 // ====== Bot State ======
 const activeBot = ref<{ name: string; avatar: string; id: string }>({ name: '', avatar: '🐱', id: '' })
@@ -134,14 +159,14 @@ async function loadActiveBot() {
 }
 
 const navItems = computed(() => [
-  { id: 'bots', labelKey: 'nav.bots', mdiIcon: 'mdi-robot-outline', badge: undefined },
   { id: 'chat', labelKey: 'nav.chat', mdiIcon: 'mdi-chat-outline', badge: undefined },
   { id: 'feed', labelKey: 'nav.feed', mdiIcon: 'mdi-broadcast', badge: channelMsgCount.value || undefined },
-  { id: 'channels', labelKey: 'nav.channels', mdiIcon: 'mdi-link-variant', badge: undefined },
-  { id: 'sessions', labelKey: 'nav.sessions', mdiIcon: 'mdi-folder-outline', badge: sessions.value.length || undefined },
+  { id: 'bots', labelKey: 'nav.bots', mdiIcon: 'mdi-robot-outline', badge: undefined },
   { id: 'providers', labelKey: 'nav.providers', mdiIcon: 'mdi-key-outline', badge: undefined },
-  { id: 'config', labelKey: 'nav.config', mdiIcon: 'mdi-cog-outline', badge: undefined },
+  { id: 'channels', labelKey: 'nav.channels', mdiIcon: 'mdi-link-variant', badge: undefined },
   { id: 'gateway', labelKey: 'nav.gateway', mdiIcon: 'mdi-web', badge: undefined },
+  { id: 'sessions', labelKey: 'nav.sessions', mdiIcon: 'mdi-folder-outline', badge: sessions.value.length || undefined },
+  { id: 'config', labelKey: 'nav.config', mdiIcon: 'mdi-cog-outline', badge: undefined },
   { id: 'system', labelKey: 'nav.system', mdiIcon: 'mdi-information-outline', badge: undefined },
 ])
 
@@ -155,8 +180,8 @@ function onToggleLocale() {
 const configJson = ref('{}')
 async function loadConfig() { try { configJson.value = await GetConfig() } catch {} }
 async function saveConfig(json: string) {
-  try { await SaveConfig(json); configJson.value = json }
-  catch (e) { alert(t('common.saveFailed') + e) }
+  try { await SaveConfig(json); configJson.value = json; notify(t('common.success')) }
+  catch (e) { notify(t('common.saveFailed') + e, 'error', 'mdi-alert-circle') }
 }
 
 // ====== Gateway ======
@@ -164,9 +189,9 @@ const gatewayStatus = ref<any>({ running: false })
 const gatewayRunning = computed(() => gatewayStatus.value?.running || false)
 const gatewayLogs = ref('')
 async function loadGatewayStatus() { try { gatewayStatus.value = await GetGatewayStatus() } catch {} }
-async function startGateway() { try { await StartGateway(); await loadGatewayStatus() } catch (e) { alert(t('common.error') + ': ' + e) } }
-async function stopGateway() { try { await StopGateway(); await loadGatewayStatus() } catch (e) { alert(t('common.error') + ': ' + e) } }
-async function restartGateway() { try { await RestartGateway(); await loadGatewayStatus() } catch (e) { alert(t('common.error') + ': ' + e) } }
+async function startGateway() { try { await StartGateway(); await loadGatewayStatus(); notify(t('gateway.start')) } catch (e) { notify(String(e), 'error', 'mdi-alert-circle') } }
+async function stopGateway() { try { await StopGateway(); await loadGatewayStatus(); notify(t('gateway.stop'), 'info', 'mdi-stop') } catch (e) { notify(String(e), 'error', 'mdi-alert-circle') } }
+async function restartGateway() { try { await RestartGateway(); await loadGatewayStatus(); notify(t('gateway.restart')) } catch (e) { notify(String(e), 'error', 'mdi-alert-circle') } }
 async function clearLogs() { try { await ClearGatewayLogs(); gatewayLogs.value = '' } catch {} }
 
 // ====== Sessions ======
@@ -192,7 +217,6 @@ function onSetupDone() {
 
 // ====== Lifecycle ======
 onMounted(async () => {
-  // Check if setup is needed
   try {
     const state = await GetSetupState()
     if (state.needsSetup) {
@@ -204,7 +228,6 @@ onMounted(async () => {
   await Promise.all([loadActiveBot(), loadConfig(), loadGatewayStatus(), loadNanobotInfo()])
   try { systemInfo.value = await GetSystemInfo() } catch {}
 
-  // Event listeners
   EventsOn('navigate', (page: string) => { currentPage.value = page })
   EventsOn('gateway:status', (status: any) => { gatewayStatus.value = status })
   EventsOn('gateway:stdout', () => { refreshLogs() })
@@ -232,63 +255,78 @@ function refreshLogs() {
 </script>
 
 <style>
-/* Global overrides */
-html, body {
-  overflow: hidden;
-  -webkit-user-select: none;
-  user-select: none;
-}
+/* ====== Global ====== */
+html, body { overflow: hidden; -webkit-user-select: none; user-select: none; }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #5a5a78; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9898b0; }
+::-webkit-scrollbar-thumb { background: #3a3a58; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #5a5a78; }
 
-/* Status dot animation */
+/* Status dot */
 .status-dot {
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
   background: #ff6b6b; flex-shrink: 0; display: inline-block;
 }
 .status-dot.running {
   background: #00cec9;
-  box-shadow: 0 0 6px #00cec9;
+  box-shadow: 0 0 5px #00cec9;
   animation: pulse 2s ease-in-out infinite;
 }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
 
 /* Bot switcher hover */
-.bot-switcher:hover {
-  border-color: #6c5ce7 !important;
-  background: #2a2a48 !important;
+.bot-switcher:hover { border-color: #6c5ce7 !important; background: #1e1e38 !important; }
+.bot-switcher { transition: all 0.15s ease; }
+
+/* Locale toggle */
+.locale-btn { -webkit-app-region: no-drag; }
+
+/* Sidebar border fix */
+.app-sidebar .v-navigation-drawer__border { background-color: #1e1e35 !important; }
+
+/* Nav item custom */
+.nav-item-custom { min-height: 34px !important; margin-bottom: 1px !important; }
+.nav-item-custom .v-list-item-title { font-size: 13px !important; }
+.nav-item-custom .v-list-item__prepend { margin-inline-end: 10px !important; }
+
+/* Nav badge */
+.nav-badge {
+  background: #ff6b6b; color: white;
+  padding: 0 5px; border-radius: 8px;
+  font-size: 10px; font-weight: 600;
+  min-width: 16px; text-align: center; line-height: 16px;
 }
 
-/* Locale toggle button */
-.locale-btn {
-  -webkit-app-region: no-drag;
-}
-
-/* Fix Vuetify nav drawer border */
-.app-sidebar .v-navigation-drawer__border {
-  background-color: #2a2a45 !important;
-}
-
-/* Page header style */
+/* Page header */
 .page-header {
-  padding: 12px 20px;
-  border-bottom: 1px solid #2a2a45;
-  display: flex;
-  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #1e1e35;
+  display: flex; align-items: center;
   justify-content: space-between;
-  background: #0f0f1a;
+  background: #0d0d18;
   -webkit-app-region: drag;
   gap: 12px;
+  min-height: 48px;
 }
+.page-header h2 { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.page-header .actions { -webkit-app-region: no-drag; }
 
 /* Page body */
 .page-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
+  flex: 1; overflow-y: auto; padding: 20px;
 }
+
+/* Card base */
+.card-base {
+  background: #161628;
+  border: 1px solid #222240;
+  border-radius: 10px;
+  transition: border-color 0.15s;
+}
+.card-base:hover { border-color: #6c5ce7; }
+
+/* Snackbar overrides */
+.v-snackbar__content { padding: 8px 14px !important; }
 </style>

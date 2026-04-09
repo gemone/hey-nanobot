@@ -1,53 +1,49 @@
 <template>
   <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2 class="text-body-1 font-weight-bold">{{ t('gateway.title') }}</h2>
-      <div class="d-flex ga-2">
-        <v-btn v-if="!status.running" color="success" size="small" prepend-icon="mdi-play" @click="$emit('start')">{{ t('gateway.start') }}</v-btn>
-        <v-btn v-if="status.running" color="error" size="small" prepend-icon="mdi-stop" @click="$emit('stop')">{{ t('gateway.stop') }}</v-btn>
+      <div class="d-flex align-center ga-2">
+        <v-icon size="20" color="primary">mdi-web</v-icon>
+        <span class="text-body-1 font-weight-bold">{{ t('gateway.title') }}</span>
+        <span class="status-dot" :class="{ running: status.running }" style="margin-left: 4px;"></span>
+      </div>
+      <div class="actions d-flex ga-2">
+        <v-btn v-if="!status.running" color="success" size="small" variant="tonal" prepend-icon="mdi-play" @click="$emit('start')">{{ t('gateway.start') }}</v-btn>
+        <v-btn v-if="status.running" color="error" size="small" variant="tonal" prepend-icon="mdi-stop" @click="$emit('stop')">{{ t('gateway.stop') }}</v-btn>
         <v-btn v-if="status.running" size="small" variant="outlined" prepend-icon="mdi-refresh" @click="$emit('restart')">{{ t('gateway.restart') }}</v-btn>
       </div>
     </div>
 
     <!-- Stats -->
     <div class="pa-4 pb-2">
-      <v-row>
-        <v-col cols="3">
-          <v-card rounded="lg" class="pa-3 text-center" color="#1a1a30" style="border: 1px solid #2a2a45;">
-            <div class="text-caption text-medium-emphasis mb-1">{{ t('gateway.pid') }}</div>
-            <div class="text-h6 font-weight-bold">{{ status.pid || '—' }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card rounded="lg" class="pa-3 text-center" color="#1a1a30" style="border: 1px solid #2a2a45;">
-            <div class="text-caption text-medium-emphasis mb-1">{{ t('gateway.port') }}</div>
-            <div class="text-h6 font-weight-bold">{{ status.port || '—' }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card rounded="lg" class="pa-3 text-center" color="#1a1a30" style="border: 1px solid #2a2a45;">
-            <div class="text-caption text-medium-emphasis mb-1">{{ t('gateway.uptime') }}</div>
-            <div class="text-h6 font-weight-bold">{{ status.uptime || '—' }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card rounded="lg" class="pa-3 text-center" :color="status.running ? 'rgba(0,206,201,0.1)' : '#1a1a30'" style="border: 1px solid #2a2a45;">
-            <div class="text-caption text-medium-emphasis mb-1">{{ t('gateway.status') }}</div>
-            <div class="text-h6 font-weight-bold" :color="status.running ? 'success' : 'error'">
-              {{ status.running ? t('common.online') : t('common.offline') }}
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">{{ t('gateway.pid') }}</div>
+          <div class="stat-value">{{ status.pid || '—' }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">{{ t('gateway.port') }}</div>
+          <div class="stat-value">{{ status.port || '—' }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">{{ t('gateway.uptime') }}</div>
+          <div class="stat-value">{{ status.uptime || '—' }}</div>
+        </div>
+        <div class="stat-card" :class="{ 'stat-active': status.running }">
+          <div class="stat-label">{{ t('gateway.status') }}</div>
+          <div class="stat-value" :style="{ color: status.running ? '#00cec9' : '#ff6b6b' }">
+            {{ status.running ? t('common.online') : t('common.offline') }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Logs -->
-    <div class="px-4 pb-1 d-flex align-center justify-space-between">
-      <span class="text-caption text-medium-emphasis">{{ t('gateway.logs') }}</span>
-      <v-btn variant="text" size="x-small" prepend-icon="mdi-delete-sweep" @click="$emit('clear-logs')">{{ t('gateway.clearLogs') }}</v-btn>
+    <div class="px-4 pb-2 d-flex align-center justify-space-between">
+      <span class="text-caption font-weight-semibold" style="text-transform: uppercase; letter-spacing: 0.5px; color: #5a5a78;">{{ t('gateway.logs') }}</span>
+      <v-btn variant="text" size="x-small" prepend-icon="mdi-delete-sweep" @click="$emit('clear-logs')" style="color: #5a5a78;">{{ t('gateway.clearLogs') }}</v-btn>
     </div>
-    <div class="flex-grow-1 mx-4 mb-4 pa-3 rounded-lg overflow-y-auto" style="background: #0f0f1a; border: 1px solid #2a2a45; font-family: 'SF Mono', monospace; font-size: 11px; line-height: 1.5;">
-      <pre style="white-space: pre-wrap; word-break: break-all; color: #9898b0;">{{ logs || t('gateway.noLogs') }}</pre>
+    <div class="log-view flex-grow-1 mx-4 mb-4 pa-3 rounded-lg">
+      <pre>{{ logs || t('gateway.noLogs') }}</pre>
     </div>
   </div>
 </template>
@@ -55,7 +51,37 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-
 defineProps<{ status: any; logs: string }>()
 defineEmits(['start', 'stop', 'restart', 'clear-logs'])
 </script>
+
+<style scoped>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.stat-card {
+  background: #161628;
+  border: 1px solid #222240;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-card.stat-active {
+  border-color: rgba(0,206,201,0.3);
+  background: rgba(0,206,201,0.04);
+}
+.stat-label { font-size: 10px; color: #5a5a78; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.stat-value { font-size: 16px; font-weight: 700; }
+.log-view {
+  background: #0a0a14;
+  border: 1px solid #1e1e35;
+  overflow-y: auto;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #7a7a98;
+}
+.log-view pre { white-space: pre-wrap; word-break: break-all; margin: 0; }
+</style>

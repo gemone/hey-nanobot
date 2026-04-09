@@ -30,7 +30,8 @@
     "deleteWarning": "这将删除该 Bot 的配置和工作空间，无法恢复。",
     "delete": "删除",
     "editTitle": "编辑 Bot",
-    "save": "保存"
+    "save": "保存",
+    "switch": "切换"
   },
   "setup": {
     "welcome": "欢迎使用 Hey Nanobot",
@@ -145,7 +146,9 @@
     "defaultProvider": "默认服务商",
     "defaultModel": "默认模型",
     "autoDetect": "自动检测",
-    "apiBase": "API 地址"
+    "apiBase": "API 地址",
+    "configured": "已配置",
+    "allProviders": "全部服务商"
   },
   "channel": {
     "title": "🔗 消息渠道",

@@ -30,7 +30,8 @@
     "deleteWarning": "This will remove the bot's config and workspace. This cannot be undone.",
     "delete": "Delete",
     "editTitle": "Edit Bot",
-    "save": "Save"
+    "save": "Save",
+    "switch": "Switch"
   },
   "setup": {
     "welcome": "Welcome to Hey Nanobot",
@@ -145,7 +146,9 @@
     "defaultProvider": "Default Provider",
     "defaultModel": "Default Model",
     "autoDetect": "Auto Detect",
-    "apiBase": "API Base URL"
+    "apiBase": "API Base URL",
+    "configured": "Configured",
+    "allProviders": "All Providers"
   },
   "channel": {
     "title": "🔗 Channels",

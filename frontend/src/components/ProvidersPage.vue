@@ -1,16 +1,20 @@
 <template>
   <div class="page-body">
-    <div class="d-flex align-center justify-space-between mb-5">
-      <h2 class="text-body-1 font-weight-bold">{{ t('provider.title') }}</h2>
+    <!-- Page Title -->
+    <div class="d-flex align-center justify-space-between mb-4">
+      <div class="d-flex align-center ga-2">
+        <v-icon size="20" color="primary">mdi-key-outline</v-icon>
+        <span class="text-body-1 font-weight-bold">{{ t('provider.title') }}</span>
+      </div>
     </div>
 
-    <!-- Agent Defaults (model selection) -->
-    <v-card rounded="lg" class="pa-4 mb-4" style="border: 1px solid #6c5ce7; background: rgba(108,92,231,0.05);">
+    <!-- Agent Defaults -->
+    <div class="card-base pa-4 mb-4" style="border-color: rgba(108,92,231,0.35);">
       <div class="d-flex align-center ga-2 mb-3">
-        <v-icon size="18" color="primary">mdi-robot-outline</v-icon>
-        <span class="text-body-2 font-weight-semibold">{{ t('provider.agentDefaults') }}</span>
+        <v-icon size="16" color="primary">mdi-robot-outline</v-icon>
+        <span class="text-caption font-weight-semibold" style="text-transform: uppercase; letter-spacing: 0.5px;">{{ t('provider.agentDefaults') }}</span>
       </div>
-      <v-row>
+      <v-row dense>
         <v-col cols="6">
           <v-select
             :model-value="agentDefaults.provider || 'auto'"
@@ -26,7 +30,7 @@
         <v-col cols="6">
           <v-text-field
             :model-value="agentDefaults.model || ''"
-            @update:model-value="updateAgentField('model', $event)"
+            @update:model-value="debouncedAgentField('model', $event)"
             :label="t('provider.defaultModel')"
             variant="outlined"
             density="compact"
@@ -36,20 +40,23 @@
           />
         </v-col>
       </v-row>
-    </v-card>
+    </div>
 
-    <!-- Provider Cards -->
-    <v-row>
-      <v-col v-for="pv in providerList" :key="pv.name" cols="12" sm="6" md="4" lg="3">
-        <v-card rounded="lg" class="pa-4" :style="providerCardStyle(pv)" @mouseenter="pv._hover = true" @mouseleave="pv._hover = false">
+    <!-- Configured Providers -->
+    <div v-if="configuredList.length" class="mb-3">
+      <div class="text-caption font-weight-semibold mb-2" style="text-transform: uppercase; letter-spacing: 0.5px; color: #5a5a78;">
+        {{ t('provider.configured') }}
+      </div>
+      <div class="provider-grid">
+        <div v-for="pv in configuredList" :key="pv.name" class="card-base pa-4">
           <div class="d-flex align-center ga-2 mb-3">
-            <v-icon size="18" :color="pv.hasKey ? 'success' : 'grey'">mdi-{{ providerIcon(pv.name) }}</v-icon>
+            <v-icon size="18" color="success">mdi-{{ providerIcon(pv.name) }}</v-icon>
             <span class="text-body-2 font-weight-semibold">{{ providerDisplayName(pv.name) }}</span>
-            <v-chip v-if="pv.hasKey" size="x-small" color="success" variant="tonal" class="ml-auto">✓</v-chip>
+            <v-chip size="x-small" color="success" variant="tonal" class="ml-auto">✓</v-chip>
           </div>
           <v-text-field
             :model-value="pv.apiKey"
-            @update:model-value="updateProviderField(pv.name, 'apiKey', $event)"
+            @update:model-value="debouncedProviderField(pv.name, 'apiKey', $event)"
             :label="t('provider.apiKey')"
             variant="outlined"
             density="compact"
@@ -62,7 +69,7 @@
           />
           <v-text-field
             :model-value="pv.apiBase"
-            @update:model-value="updateProviderField(pv.name, 'apiBase', $event)"
+            @update:model-value="debouncedProviderField(pv.name, 'apiBase', $event)"
             :label="t('provider.apiBase')"
             variant="outlined"
             density="compact"
@@ -70,32 +77,71 @@
             :placeholder="defaultApiBase(pv.name)"
             prepend-inner-icon="mdi-web"
           />
-        </v-card>
-      </v-col>
-    </v-row>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Providers (collapsible) -->
+    <div v-if="unconfiguredList.length">
+      <div class="d-flex align-center cursor-pointer py-2" @click="showAll = !showAll">
+        <v-icon size="14" class="mr-1" :class="{ 'rotate-90': showAll }">mdi-chevron-right</v-icon>
+        <span class="text-caption font-weight-semibold" style="text-transform: uppercase; letter-spacing: 0.5px; color: #5a5a78;">
+          {{ t('provider.allProviders') }} ({{ unconfiguredList.length }})
+        </span>
+      </div>
+      <template v-if="showAll">
+        <div class="provider-grid">
+          <div v-for="pv in unconfiguredList" :key="pv.name" class="card-base pa-4" style="opacity: 0.85;">
+            <div class="d-flex align-center ga-2 mb-3">
+              <v-icon size="18" color="grey">mdi-{{ providerIcon(pv.name) }}</v-icon>
+              <span class="text-body-2 font-weight-semibold" style="color: #9898b0;">{{ providerDisplayName(pv.name) }}</span>
+            </div>
+            <v-text-field
+              :model-value="pv.apiKey"
+              @update:model-value="debouncedProviderField(pv.name, 'apiKey', $event)"
+              :label="t('provider.apiKey')"
+              variant="outlined"
+              density="compact"
+              hide-details
+              :type="showKeys[pv.name] ? 'text' : 'password'"
+              :placeholder="apiKeyPlaceholder(pv.name)"
+              :append-inner-icon="showKeys[pv.name] ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showKeys[pv.name] = !showKeys[pv.name]"
+              class="mb-2"
+            />
+            <v-text-field
+              :model-value="pv.apiBase"
+              @update:model-value="debouncedProviderField(pv.name, 'apiBase', $event)"
+              :label="t('provider.apiBase')"
+              variant="outlined"
+              density="compact"
+              hide-details
+              :placeholder="defaultApiBase(pv.name)"
+              prepend-inner-icon="mdi-web"
+            />
+          </div>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, watch } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { GetProviders, SetProviderField, GetAgentDefaults, SetAgentDefaults } from '../../wailsjs/go/main/App'
 
 const { t } = useI18n()
 
 interface ProviderInfo {
-  name: string
-  apiKey: string
-  apiBase: string
-  hasKey: boolean
-  _hover: boolean
+  name: string; apiKey: string; apiBase: string; hasKey: boolean
 }
 
 const providers = ref<Record<string, any>>({})
 const agentDefaults = ref<Record<string, any>>({})
 const showKeys = reactive<Record<string, boolean>>({})
+const showAll = ref(false)
 
-// All known provider names
 const allProviders = [
   'openai', 'anthropic', 'google', 'deepseek', 'openrouter',
   'ollama', 'groq', 'zhipu', 'dashscope', 'vllm', 'gemini',
@@ -103,106 +149,72 @@ const allProviders = [
   'azure_openai', 'custom',
 ]
 
-const providerList = computed<ProviderInfo[]>(() => {
-  const configured: ProviderInfo[] = []
-  const unconfigured: ProviderInfo[] = []
-  for (const name of allProviders) {
-    const pv = providers.value[name] || {}
-    const hasKey = !!(pv.apiKey || pv.api_key)
-    const info: ProviderInfo = {
-      name,
-      apiKey: pv.apiKey || pv.api_key || '',
-      apiBase: pv.apiBase || pv.api_base || '',
-      hasKey,
-      _hover: false,
-    }
-    if (hasKey || pv.apiBase || pv.api_base) {
-      configured.push(info)
-    } else {
-      unconfigured.push(info)
-    }
-  }
-  return [...configured, ...unconfigured]
-})
+const configuredList = computed<ProviderInfo[]>(() =>
+  allProviders
+    .filter(name => { const pv = providers.value[name] || {}; return !!(pv.apiKey || pv.api_key || pv.apiBase || pv.api_base) })
+    .map(name => { const pv = providers.value[name] || {}; return { name, apiKey: pv.apiKey || pv.api_key || '', apiBase: pv.apiBase || pv.api_base || '', hasKey: !!(pv.apiKey || pv.api_key) } })
+)
+
+const unconfiguredList = computed<ProviderInfo[]>(() =>
+  allProviders
+    .filter(name => { const pv = providers.value[name] || {}; return !(pv.apiKey || pv.api_key || pv.apiBase || pv.api_base) })
+    .map(name => ({ name, apiKey: '', apiBase: '', hasKey: false }))
+)
 
 const providerSelectItems = computed(() => [
   { title: t('provider.autoDetect'), value: 'auto' },
-  ...allProviders.filter(n => !['custom', 'azure_openai'].includes(n)).map(n => ({
-    title: providerDisplayName(n), value: n,
-  })),
+  ...allProviders.filter(n => !['custom', 'azure_openai'].includes(n)).map(n => ({ title: providerDisplayName(n), value: n })),
 ])
 
 function providerDisplayName(name: string): string {
-  const names: Record<string, string> = {
-    openai: 'OpenAI', anthropic: 'Anthropic', google: 'Google',
-    deepseek: 'DeepSeek', openrouter: 'OpenRouter', ollama: 'Ollama',
-    groq: 'Groq', zhipu: '智谱 AI', dashscope: '通义千问',
-    vllm: 'vLLM', gemini: 'Gemini', moonshot: 'Moonshot',
-    minimax: 'MiniMax', mistral: 'Mistral', stepfun: '阶跃星辰',
-    aihubmix: 'AiHubMix', azure_openai: 'Azure OpenAI', custom: 'Custom',
-  }
-  return names[name] || name
+  const m: Record<string, string> = { openai: 'OpenAI', anthropic: 'Anthropic', google: 'Google', deepseek: 'DeepSeek', openrouter: 'OpenRouter', ollama: 'Ollama', groq: 'Groq', zhipu: '智谱 AI', dashscope: '通义千问', vllm: 'vLLM', gemini: 'Gemini', moonshot: 'Moonshot', minimax: 'MiniMax', mistral: 'Mistral', stepfun: '阶跃星辰', aihubmix: 'AiHubMix', azure_openai: 'Azure OpenAI', custom: 'Custom' }
+  return m[name] || name
 }
-
 function providerIcon(name: string): string {
-  const icons: Record<string, string> = {
-    openai: 'alpha-o-circle', anthropic: 'alpha-a-circle', google: 'google',
-    deepseek: 'brain', openrouter: 'transfer', ollama: 'llama',
-  }
-  return icons[name] || 'cloud-outline'
+  const m: Record<string, string> = { openai: 'alpha-o-circle', anthropic: 'alpha-a-circle', google: 'google', deepseek: 'brain', openrouter: 'transfer', ollama: 'llama' }
+  return m[name] || 'cloud-outline'
 }
-
 function apiKeyPlaceholder(name: string): string {
-  const placeholders: Record<string, string> = {
-    openai: 'sk-...', anthropic: 'sk-ant-...', google: 'AI...', deepseek: 'sk-...',
-    openrouter: 'sk-or-...', ollama: '(not required)',
-  }
-  return placeholders[name] || ''
+  const m: Record<string, string> = { openai: 'sk-...', anthropic: 'sk-ant-...', google: 'AI...', deepseek: 'sk-...', openrouter: 'sk-or-...', ollama: '(not required)' }
+  return m[name] || ''
 }
-
 function defaultApiBase(name: string): string {
-  const bases: Record<string, string> = {
-    openai: 'https://api.openai.com/v1',
-    anthropic: 'https://api.anthropic.com',
-    deepseek: 'https://api.deepseek.com',
-    openrouter: 'https://openrouter.ai/api/v1',
-    ollama: 'http://localhost:11434',
-  }
-  return bases[name] || ''
+  const m: Record<string, string> = { openai: 'https://api.openai.com/v1', anthropic: 'https://api.anthropic.com', deepseek: 'https://api.deepseek.com', openrouter: 'https://openrouter.ai/api/v1', ollama: 'http://localhost:11434' }
+  return m[name] || ''
 }
 
-function providerCardStyle(pv: ProviderInfo) {
-  return {
-    border: pv._hover ? '1px solid #6c5ce7' : '1px solid #2a2a45',
-    transition: 'border-color 0.2s',
-  }
+// ====== Debounced save ======
+const _timers: Record<string, any> = {}
+function debouncedProviderField(provider: string, field: string, value: string) {
+  const key = `pv.${provider}.${field}`
+  clearTimeout(_timers[key])
+  _timers[key] = setTimeout(async () => {
+    try { await SetProviderField(provider, field, value); await loadData() } catch (e) { window.__notify?.(String(e), 'error', 'mdi-alert-circle') }
+  }, 600)
 }
-
-async function updateProviderField(provider: string, field: string, value: string) {
-  try {
-    // nanobot config uses camelCase (apiKey, apiBase)
-    const configField = field === 'apiKey' ? 'apiKey' : 'apiBase'
-    await SetProviderField(provider, configField, value)
-    await loadData()
-  } catch (e) {
-    alert(t('common.error') + ': ' + e)
-  }
+function debouncedAgentField(field: string, value: string) {
+  const key = `agent.${field}`
+  clearTimeout(_timers[key])
+  _timers[key] = setTimeout(async () => {
+    try { const updated = { ...agentDefaults.value, [field]: value }; await SetAgentDefaults(JSON.stringify(updated)); await loadData() } catch (e) { window.__notify?.(String(e), 'error', 'mdi-alert-circle') }
+  }, 600)
 }
-
 async function updateAgentField(field: string, value: string) {
-  try {
-    const updated = { ...agentDefaults.value, [field]: value }
-    await SetAgentDefaults(JSON.stringify(updated))
-    await loadData()
-  } catch (e) {
-    alert(t('common.error') + ': ' + e)
-  }
+  try { const updated = { ...agentDefaults.value, [field]: value }; await SetAgentDefaults(JSON.stringify(updated)); await loadData() } catch (e) { window.__notify?.(String(e), 'error', 'mdi-alert-circle') }
 }
 
 async function loadData() {
   try { providers.value = await GetProviders() } catch {}
   try { agentDefaults.value = await GetAgentDefaults() || {} } catch {}
 }
-
 onMounted(loadData)
 </script>
+
+<style scoped>
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.rotate-90 { transform: rotate(90deg); }
+</style>

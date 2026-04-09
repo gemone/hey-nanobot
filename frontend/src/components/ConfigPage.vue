@@ -1,19 +1,20 @@
 <template>
   <div class="d-flex flex-column" style="height: 100%;">
     <div class="page-header">
-      <h2 class="text-body-1 font-weight-bold">{{ t('config.title') }}</h2>
-      <div class="d-flex ga-2">
-        <v-btn variant="text" size="small" prepend-icon="mdi-content-copy" @click="formatConfig">{{ t('config.format') }}</v-btn>
-        <v-btn color="primary" size="small" prepend-icon="mdi-content-save" @click="$emit('save', localConfig)">{{ t('config.save') }}</v-btn>
+      <div class="d-flex align-center ga-2">
+        <v-icon size="20" color="primary">mdi-cog-outline</v-icon>
+        <span class="text-body-1 font-weight-bold">{{ t('config.title') }}</span>
+      </div>
+      <div class="actions d-flex ga-2">
+        <v-btn variant="text" size="small" prepend-icon="mdi-code-tags" @click="formatConfig" style="color: #9898b0;">{{ t('config.format') }}</v-btn>
+        <v-btn color="primary" size="small" variant="tonal" prepend-icon="mdi-content-save" @click="$emit('save', localConfig)">{{ t('config.save') }}</v-btn>
       </div>
     </div>
     <div class="flex-grow-1 pa-4">
-      <v-textarea
+      <textarea
         v-model="localConfig"
-        auto-grow
-        variant="outlined"
-        hide-details
-        style="font-family: 'SF Mono', Monaco, Menlo, monospace; font-size: 12px; line-height: 1.6;"
+        spellcheck="false"
+        class="config-editor-textarea"
       />
     </div>
   </div>
@@ -24,16 +25,29 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-
 const props = defineProps<{ configJson: string }>()
-const emit = defineEmits<{ (e: 'save', json: string): void }>()
+defineEmits<{ (e: 'save', json: string): void }>()
 
 const localConfig = ref(props.configJson)
 watch(() => props.configJson, (v) => { localConfig.value = v })
 
 function formatConfig() {
-  try {
-    localConfig.value = JSON.stringify(JSON.parse(localConfig.value), null, 2)
-  } catch {}
+  try { localConfig.value = JSON.stringify(JSON.parse(localConfig.value), null, 2) } catch {}
 }
 </script>
+
+<style scoped>
+.config-editor-textarea {
+  width: 100%; height: 100%;
+  background: #0a0a14;
+  border: 1px solid #1e1e35;
+  border-radius: 8px;
+  color: #b0b0c8;
+  padding: 14px;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  resize: none; outline: none; tab-size: 2;
+}
+.config-editor-textarea:focus { border-color: #6c5ce7; }
+</style>
