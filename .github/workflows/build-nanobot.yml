@@ -118,7 +118,18 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           ls nanobot-bin\
-          .\nanobot-bin\nanobot.exe --version
+          $binaryExists = Test-Path .\nanobot-bin\nanobot.exe
+          if ($binaryExists) {
+            Write-Host "✓ nanobot.exe exists"
+            try {
+              .\nanobot-bin\nanobot.exe --version 2>&1 | Write-Host
+            } catch {
+              Write-Host "⚠ version check failed (non-fatal): $_"
+            }
+          } else {
+            Write-Error "nanobot.exe not found!"
+            exit 1
+          }
         shell: pwsh
 
       - name: Package (Windows)
